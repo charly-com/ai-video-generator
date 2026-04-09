@@ -4,6 +4,8 @@
 // ──────────────────────────────────────────────────────────────
  
 import crypto from 'crypto';
+import { prisma } from '../db/prisma';
+
  
 export function getTwitterAuthUrl(userId: string): { url: string; codeVerifier: string; state: string } {
   const codeVerifier = crypto.randomBytes(32).toString('base64url');

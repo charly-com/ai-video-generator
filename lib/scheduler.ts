@@ -4,6 +4,7 @@
 // ──────────────────────────────────────────────────────────────
 import { Queue, Worker, Job } from 'bullmq';
 import IORedis from 'ioredis';
+import { prisma } from './db/prisma';
  
 const connection = new IORedis(process.env.REDIS_URL!, { maxRetriesPerRequest: null });
  

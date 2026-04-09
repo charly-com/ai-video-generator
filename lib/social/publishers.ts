@@ -1,6 +1,6 @@
 // src/lib/social/publishers.ts
 
-import type { SocialAccount, SocialPlatform } from  './types/index';
+import type { SocialAccount, SocialPlatform } from  '../../types';
 
 // ─── YouTube Publisher ────────────────────────────────────────────────────────
 
@@ -422,7 +422,7 @@ export async function publishToplatform(
 ): Promise<{ platformPostId: string; url?: string }> {
   switch (platform) {
     case 'youtube': {
-      const opts = payload.options as YouTubeUploadOptions
+      const opts = payload.options as unknown as YouTubeUploadOptions
       const result = await uploadToYouTube(account, {
         ...opts,
         videoUrl: payload.mediaUrl,

@@ -2,7 +2,8 @@
 // ──────────────────────────────────────────────────────────────
 // lib/social/instagram.ts
 // ──────────────────────────────────────────────────────────────
- 
+import { prisma } from '../db/prisma';
+
 export function getInstagramAuthUrl(userId: string): string {
   const params = new URLSearchParams({
     client_id: process.env.META_APP_ID!,

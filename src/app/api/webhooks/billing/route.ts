@@ -1,7 +1,7 @@
 // src/app/api/billing/webhook/route.ts
 
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db/prisma'
+import { prisma } from '../../../../../lib/db/prisma';
 import crypto from 'crypto'
 
 export async function POST(req: NextRequest) {
@@ -148,8 +148,8 @@ async function handlePaymentFailed(data: {
 
 async function handleInvoiceRenewal(data: {
   subscription: { customer: string }
-  period_start: string
-  period_end: string
+  period_start: number | string
+  period_end: number | string
 }) {
   // Find user by Paystack customer code
   const subscription = await prisma.subscription.findFirst({
@@ -157,8 +157,8 @@ async function handleInvoiceRenewal(data: {
   })
   if (!subscription) return
 
-  const periodStart = new Date(data.period_start * 1000)
-  const periodEnd = new Date(data.period_end * 1000)
+  const periodStart = new Date(Number(data.period_start) * 1000)
+  const periodEnd = new Date(Number(data.period_end) * 1000)
 
   await prisma.subscription.update({
     where: { id: subscription.id },

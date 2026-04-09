@@ -2,11 +2,11 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { prisma } from '@/lib/db/prisma'
-import { generateImage, editImage, upscaleImage, removeBackground } from '@/lib/fal/client'
+import { prisma } from '../../../../../lib/db/prisma';
+import { generateImage, editImage, upscaleImage, removeBackground } from '../../../../../lib/fal';
 import { z } from 'zod'
-import type { ApiResponse } from '@/types'
-import { PRICING_TIERS } from '@/types'
+import type { ApiResponse } from '../../../../../types';
+import { PRICING_TIERS } from '../../../../../types';
 
 const GenerateImageSchema = z.object({
   action: z.enum(['generate', 'edit', 'upscale', 'remove-bg']),

@@ -1,6 +1,6 @@
 import { google } from 'googleapis';
-import { prisma } from '@/lib/prisma';
- 
+import { prisma } from '../db/prisma';
+
 const oauth2Client = new google.auth.OAuth2(
   process.env.YOUTUBE_CLIENT_ID,
   process.env.YOUTUBE_CLIENT_SECRET,

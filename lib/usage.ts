@@ -1,8 +1,8 @@
 // ──────────────────────────────────────────────────────────────
 // lib/usage.ts — Usage limit enforcement
 // ──────────────────────────────────────────────────────────────
-import { prisma } from './prisma';
-import type { UsageType } from '@prisma/client';
+import { prisma } from './db/prisma';
+import { getPlanLimits, type PlanTierKey } from './pricing';
  
 export async function checkUsageLimit(
   userId: string,
@@ -16,7 +16,7 @@ export async function checkUsageLimit(
   startOfMonth.setDate(1);
   startOfMonth.setHours(0, 0, 0, 0);
  
-  const usageType: UsageType = type === 'video_generation' ? 'video_generation' : 'image_generation';
+  const usageType = type === 'video_generation' ? 'video_generation' : 'image_generation';
   const limitField = type === 'video_generation' ? 'videosPerMonth' : 'imagesPerMonth';
   const limit = limits[limitField];
  

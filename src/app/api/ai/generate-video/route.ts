@@ -2,11 +2,11 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { prisma } from '@/lib/db/prisma'
-import { generateVideo } from '@/lib/fal/client'
+import { prisma } from '../../../../../lib/db/prisma';
+import { generateVideo } from '../../../../../lib/fal';
 import { z } from 'zod'
-import type { GenerateVideoRequest, ApiResponse } from '@/types'
-import { PRICING_TIERS } from '@/types'
+import type { ApiResponse,   GenerateVideoRequest} from '../../../../../types'
+import { PRICING_TIERS } from '../../../../../types'
 
 const GenerateVideoSchema = z.object({
   prompt: z.string().min(10).max(2000),

@@ -4,8 +4,8 @@ import NextAuth from 'next-auth'
 import { PrismaAdapter } from '@auth/prisma-adapter'
 import Google from 'next-auth/providers/google'
 import Twitter from 'next-auth/providers/twitter'
-import { prisma } from '@/lib/db/prisma'
-import type { SocialPlatform } from '@/types'
+import { prisma } from '../lib/db/prisma';
+import type { SocialPlatform } from '../types'
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),

@@ -5,8 +5,15 @@ import type {
   GenerateVideoRequest,
   GenerateImageRequest,
   EditImageRequest,
-  GeneratedContent,
-} from '@/types'
+} from '../types';
+
+export const FAL_MODELS = {
+  FLUX_DEV: 'flux-dev',
+  FLUX_SCHNELL: 'flux-schnell',
+  FLUX_PRO: 'flux-pro-ultra',
+  AURA_FLOW: 'flux-realism',
+  IDEOGRAM: 'ideogram-v3',
+} as const
 
 // Initialize fal client — key is set via FAL_KEY env var automatically
 fal.config({
@@ -28,6 +35,10 @@ interface FalAuraSRResult {
   image: { url: string; width: number; height: number }
 }
 
+interface FalRembgResult {
+  image: { url: string }
+}
+
 // ─── Video Generation ─────────────────────────────────────────────────────────
 
 export async function generateVideo(req: GenerateVideoRequest) {
@@ -41,7 +52,6 @@ export async function generateVideo(req: GenerateVideoRequest) {
   const endpoint = modelEndpoints[req.model]
   if (!endpoint) throw new Error(`Unknown model: ${req.model}`)
 
-  // Build model-specific input
   const input = buildVideoInput(req)
 
   const result = await fal.subscribe(endpoint, {
@@ -52,7 +62,7 @@ export async function generateVideo(req: GenerateVideoRequest) {
         console.log('[fal] Video generation in progress:', update.logs?.map(l => l.message))
       }
     },
-  }) as { data: FalVideoResult; requestId: string }
+  }) as unknown as { data: FalVideoResult; requestId: string }
 
   return {
     fileUrl: result.data.video.url,
@@ -125,7 +135,6 @@ export async function generateImage(req: GenerateImageRequest) {
   if (req.negativePrompt) input.negative_prompt = req.negativePrompt
   if (req.guidanceScale) input.guidance_scale = req.guidanceScale
 
-  // Recraft specific
   if (req.model === 'recraft-v3' && req.style) {
     input.style = req.style
   }
@@ -133,7 +142,7 @@ export async function generateImage(req: GenerateImageRequest) {
   const result = await fal.subscribe(endpoint, {
     input,
     logs: false,
-  }) as { data: FalImageResult; requestId: string }
+  }) as unknown as { data: FalImageResult; requestId: string }
 
   return {
     images: result.data.images,
@@ -145,16 +154,15 @@ export async function generateImage(req: GenerateImageRequest) {
 // ─── Image Editing (Inpainting / Fill) ────────────────────────────────────────
 
 export async function editImage(req: EditImageRequest) {
-  const input: Record<string, unknown> = {
-    image_url: req.imageUrl,
+  const fillInput = {
     prompt: req.prompt,
+    image_url: req.imageUrl,
+    ...(req.mask ? { mask_url: req.mask } : {}),
+    ...(req.strength ? { strength: req.strength } : {}),
   }
 
-  if (req.mask) input.mask_url = req.mask
-  if (req.strength) input.strength = req.strength
-
-  const result = await fal.subscribe('fal-ai/flux-pro/v1/fill', {
-    input,
+  const result = await (fal.subscribe as Function)('fal-ai/flux-pro/v1/fill', {
+    input: fillInput,
     logs: false,
   }) as { data: FalImageResult; requestId: string }
 
@@ -170,7 +178,7 @@ export async function upscaleImage(imageUrl: string) {
   const result = await fal.subscribe('fal-ai/aura-sr', {
     input: { image_url: imageUrl },
     logs: false,
-  }) as { data: FalAuraSRResult; requestId: string }
+  }) as unknown as { data: FalAuraSRResult; requestId: string }
 
   return {
     imageUrl: result.data.image.url,
@@ -186,10 +194,10 @@ export async function removeBackground(imageUrl: string) {
   const result = await fal.subscribe('fal-ai/imageutils/rembg', {
     input: { image_url: imageUrl },
     logs: false,
-  }) as { data: FalImageResult; requestId: string }
+  }) as unknown as { data: FalRembgResult; requestId: string }
 
   return {
-    imageUrl: result.data.images[0]?.url,
+    imageUrl: result.data.image.url,
     falRequestId: result.requestId,
   }
 }
@@ -225,7 +233,6 @@ function aspectRatioToDimensions(ratio: string): [number, number] {
 }
 
 export function estimateCost(model: string, type: 'video' | 'image'): number {
-  // Rough USD cost estimates for logging/monitoring
   const costs: Record<string, number> = {
     'minimax-video-01': 0.05,
     'kling-video-v2-master': 0.14,

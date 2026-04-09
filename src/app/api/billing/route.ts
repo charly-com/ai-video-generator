@@ -2,10 +2,10 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { prisma } from '@/lib/db/prisma'
+import { prisma } from '../../../../lib/db/prisma';
 import { z } from 'zod'
-import type { ApiResponse, PlanName, BillingCycle } from '@/types'
-import { PRICING_TIERS } from '@/types'
+import type { ApiResponse, PlanName, BillingCycle } from '../../../../types';
+import { PRICING_TIERS } from '../../../../types'
 
 // Paystack plan codes — create these in your Paystack dashboard
 const PAYSTACK_PLAN_CODES: Record<PlanName, Record<BillingCycle, string | null>> = {
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     const { action } = body
 
     if (action === 'initialize') {
-      return handleInitializePayment(session.user, body)
+      return handleInitializePayment({ id: session.user.id, email: session.user.email }, body)
     }
 
     if (action === 'cancel') {

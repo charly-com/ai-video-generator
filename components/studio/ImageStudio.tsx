@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { FAL_MODELS } from '@/lib/fal';
+import { FAL_MODELS } from '../../lib/fal';
 import Image from 'next/image';
  
 const schema = z.object({
@@ -122,7 +122,7 @@ export function ImageStudio() {
         <div className="grid grid-cols-2 gap-2">
           <div>
             <label className="text-xs text-muted-foreground mb-1 block">Width</label>
-            <Select onValueChange={v => setValue('width', Number(v))} defaultValue="1024">
+            <Select onValueChange={(v: string) => setValue('width', Number(v))} defaultValue="1024">
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 {[512, 768, 1024, 1280, 1536].map(n => <SelectItem key={n} value={String(n)}>{n}px</SelectItem>)}
@@ -131,7 +131,7 @@ export function ImageStudio() {
           </div>
           <div>
             <label className="text-xs text-muted-foreground mb-1 block">Height</label>
-            <Select onValueChange={v => setValue('height', Number(v))} defaultValue="1024">
+            <Select onValueChange={(v: string) => setValue('height', Number(v))} defaultValue="1024">
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 {[512, 768, 1024, 1280, 1536].map(n => <SelectItem key={n} value={String(n)}>{n}px</SelectItem>)}
