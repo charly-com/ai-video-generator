@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import Anthropic from '@anthropic-ai/sdk'
 import { z } from 'zod'
-import type { ApiResponse } from '@/types'
+import type { ApiResponse } from '../../../../../types'
 
 const client = new Anthropic()
 
