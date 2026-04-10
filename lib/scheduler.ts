@@ -65,7 +65,7 @@ export function createPublishWorker() {
               socialAccountId: post.socialAccountId,
               mediaUrl,
               mediaType,
-              caption: [post.caption, ...post.hashtags.map(h => `#${h}`)].join('\n'),
+              caption: [post.caption, ...post.hashtags.map((h: any) => `#${h}`)].join('\n'),
             });
             break;
           }
@@ -73,7 +73,7 @@ export function createPublishWorker() {
             const { postTweet } = await import('./social/index');
             platformPostId = await postTweet({
               socialAccountId: post.socialAccountId,
-              text: `${post.caption ?? ''}\n${post.hashtags.map(h => `#${h}`).join(' ')}`.trim(),
+              text: `${post.caption ?? ''}\n${post.hashtags.map((h: any) => `#${h}`).join(' ')}`.trim(),
               mediaUrl,
             });
             break;
