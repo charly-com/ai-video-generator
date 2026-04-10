@@ -1,7 +1,7 @@
 // src/lib/claude/client.ts
 
 import Anthropic from '@anthropic-ai/sdk'
-import type { ScriptGenerationRequest, GeneratedScript, SocialPlatform } from '../types'
+import type { ScriptGenerationRequest, GeneratedScript, SocialPlatform } from '../../types'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
