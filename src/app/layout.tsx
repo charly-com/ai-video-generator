@@ -2,6 +2,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Syne, DM_Sans } from 'next/font/google'
 import { Toaster } from 'react-hot-toast'
+import CookieConsent from '@/components/CookieConsent'
 import './globals.css'
 
 const syne = Syne({
@@ -104,6 +105,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="bg-background text-foreground antialiased">
         {children}
+        <CookieConsent />
         <Toaster
           position="top-center"
           toastOptions={{

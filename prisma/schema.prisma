@@ -24,6 +24,11 @@ model User {
   socialAccounts   SocialAccount[]
   publishJobs      PublishJob[]
   analytics        ContentAnalytics[]
+  streak           CreatorStreak?
+  badges           CreatorBadge[]
+  brandKits        BrandKit[]
+  aiLogs           AIGenerationLog[]
+  notifications    Notification[]
 }
 
 model Account {
@@ -192,14 +197,14 @@ model CreatorStreak {
 }
 
 model CreatorBadge {
-  id        String   @id @default(cuid())
-  userId    String
-  badgeId   String
-  xpEarned  Int      @default(0)
-  earnedAt  DateTime @default(now())
+  id       String   @id @default(cuid())
+  userId   String
+  badgeId  String
+  xpEarned Int      @default(0)
+  earnedAt DateTime @default(now())
 
-  user   User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  streak CreatorStreak? @relation(fields: [userId], references: [userId])
+  user   User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  streak CreatorStreak? @relation(fields: [userId], references: [userId], map: "CreatorBadge_streak_fkey")
 
   @@unique([userId, badgeId])
   @@index([userId])
@@ -227,13 +232,13 @@ model BrandKit {
 }
 
 model AIGenerationLog {
-  id           String   @id @default(cuid())
-  userId       String
-  model        String
-  type         String
-  estimatedCostUsd Float @default(0)
-  tokens       Int?
-  createdAt    DateTime @default(now())
+  id               String   @id @default(cuid())
+  userId           String
+  model            String
+  type             String
+  estimatedCostUsd Float    @default(0)
+  tokens           Int?
+  createdAt        DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@index([userId])
@@ -243,7 +248,7 @@ model AIGenerationLog {
 model Notification {
   id        String   @id @default(cuid())
   userId    String
-  type      String   -- badge_earned | streak_milestone | publish_success | publish_failed
+  type      String   // badge_earned | streak_milestone | publish_success | publish_failed
   title     String
   message   String
   emoji     String?

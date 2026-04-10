@@ -1,255 +1,192 @@
-'use client'
 
-import { useState } from 'react'
-
-const MODELS = [
-  { id: 'flux-pro-ultra', label: 'Flux Pro Ultra', desc: 'Highest quality' },
-  { id: 'flux-pro', label: 'Flux Pro', desc: 'Balanced' },
-  { id: 'flux-schnell', label: 'Flux Schnell', desc: 'Fast' },
-]
-
-const ASPECT_RATIOS = ['1:1', '16:9', '9:16', '4:5', '4:3', '3:4'] as const
-type AspectRatio = typeof ASPECT_RATIOS[number]
-
-const STYLES = ['None', 'Cinematic', 'Anime', 'Digital Art', 'Photographic', 'Neon', 'Watercolor', 'Sketch']
-
-const NUM_IMAGES = [1, 2, 4]
-
-interface GeneratedImage {
-  url: string
-  width?: number
-  height?: number
-}
-
-function card(extra?: React.CSSProperties): React.CSSProperties {
-  return {
-    background: 'rgba(255,255,255,0.03)',
-    border: '1px solid rgba(255,255,255,0.07)',
-    borderRadius: 14,
-    padding: '16px',
-    ...extra,
-  }
-}
-
-function label(text: string) {
-  return (
-    <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.4)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-      {text}
-    </div>
-  )
-}
-
+// ══════════════════════════════════════════════════════════════
+// components/studio/ImageStudio.tsx
+// ══════════════════════════════════════════════════════════════
+'use client';
+ 
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from 'sonner';
+import { FAL_MODELS } from '../../lib/fal';
+import Image from 'next/image';
+ 
+const schema = z.object({
+  prompt: z.string().min(1, 'Prompt is required').max(2000),
+  negativePrompt: z.string().optional(),
+  model: z.string(),
+  width: z.coerce.number(),
+  height: z.coerce.number(),
+  numInferenceSteps: z.coerce.number(),
+  guidanceScale: z.coerce.number(),
+  outputFormat: z.enum(['jpeg', 'png', 'webp']),
+});
+ 
+type FormValues = z.infer<typeof schema>;
+ 
+const MODEL_OPTIONS = [
+  { value: FAL_MODELS.FLUX_DEV, label: 'FLUX Dev (best quality)' },
+  { value: FAL_MODELS.FLUX_SCHNELL, label: 'FLUX Schnell (fastest)' },
+  { value: FAL_MODELS.FLUX_PRO, label: 'FLUX Pro (premium)' },
+  { value: FAL_MODELS.AURA_FLOW, label: 'Aura Flow' },
+  { value: FAL_MODELS.IDEOGRAM, label: 'Ideogram v2' },
+];
+ 
 export function ImageStudio() {
-  const [prompt, setPrompt] = useState('')
-  const [negativePrompt, setNegativePrompt] = useState('')
-  const [model, setModel] = useState('flux-pro-ultra')
-  const [aspectRatio, setAspectRatio] = useState<AspectRatio>('1:1')
-  const [numImages, setNumImages] = useState(1)
-  const [style, setStyle] = useState('None')
-  const [guidanceScale, setGuidanceScale] = useState(7)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [images, setImages] = useState<GeneratedImage[]>([])
-
-  async function generate() {
-    if (!prompt.trim()) return
-    setLoading(true)
-    setError('')
+  const [generatedUrl, setGeneratedUrl] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+ 
+  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      model: FAL_MODELS.FLUX_DEV,
+      width: 1024,
+      height: 1024,
+      numInferenceSteps: 28,
+      guidanceScale: 3.5,
+      outputFormat: 'png',
+    },
+  });
+ 
+  const onSubmit = async (data: FormValues) => {
+    setIsGenerating(true);
+    setGeneratedUrl(null);
     try {
       const res = await fetch('/api/ai/generate-image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'generate',
-          prompt,
-          model,
-          aspectRatio,
-          numImages,
-          negativePrompt: negativePrompt || undefined,
-          guidanceScale,
-          style: style !== 'None' ? style : undefined,
-        }),
-      })
-      const json = await res.json()
-      if (!json.success) throw new Error(json.error)
-      const allImages: GeneratedImage[] = json.data?.metadata?.allImages ?? (json.data?.fileUrl ? [{ url: json.data.fileUrl }] : [])
-      setImages(allImages)
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Generation failed')
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? 'Generation failed');
+      setGeneratedUrl(json.url);
+      toast.success('Image generated!');
+    } catch (err) {
+      toast.error(String(err));
     } finally {
-      setLoading(false)
+      setIsGenerating(false);
     }
-  }
-
+  };
+ 
+  const handleOptimizePrompt = async () => {
+    const roughIdea = watch('prompt');
+    if (!roughIdea) return toast.error('Enter a prompt first');
+    try {
+      const res = await fetch('/api/ai/optimize-prompt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ roughIdea, targetModel: watch('model'), contentType: 'image' }),
+      });
+      const data = await res.json();
+      setValue('prompt', data.optimizedPrompt);
+      setValue('negativePrompt', data.negativePrompt);
+      toast.success('Prompt optimized by Claude');
+    } catch {
+      toast.error('Failed to optimize prompt');
+    }
+  };
+ 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 16, minHeight: 500 }}>
-      {/* Controls */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {/* Prompt */}
-        <div style={card()}>
-          {label('Prompt')}
-          <textarea
-            value={prompt}
-            onChange={e => setPrompt(e.target.value)}
-            placeholder="A cinematic shot of Lagos skyline at golden hour, Afrobeats music video aesthetic..."
-            rows={4}
-            style={{
-              width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: 8, color: '#fff', fontSize: 13, padding: '10px 12px', resize: 'none',
-              outline: 'none', boxSizing: 'border-box', lineHeight: 1.5,
-            }}
-          />
-          <textarea
-            value={negativePrompt}
-            onChange={e => setNegativePrompt(e.target.value)}
-            placeholder="Negative prompt (optional)..."
-            rows={2}
-            style={{
-              width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: 8, color: 'rgba(255,255,255,0.5)', fontSize: 12, padding: '8px 12px', resize: 'none',
-              outline: 'none', boxSizing: 'border-box', marginTop: 8,
-            }}
-          />
-        </div>
-
-        {/* Model */}
-        <div style={card()}>
-          {label('Model')}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {MODELS.map(m => (
-              <button key={m.id} onClick={() => setModel(m.id)}
-                style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '9px 12px', borderRadius: 8, border: '1px solid',
-                  borderColor: model === m.id ? 'rgba(249,115,22,0.4)' : 'rgba(255,255,255,0.07)',
-                  background: model === m.id ? 'rgba(249,115,22,0.08)' : 'transparent',
-                  cursor: 'pointer', transition: 'all 0.15s',
-                }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: model === m.id ? '#f97316' : '#fff' }}>{m.label}</span>
-                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{m.desc}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Aspect Ratio */}
-        <div style={card()}>
-          {label('Aspect Ratio')}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-            {ASPECT_RATIOS.map(r => (
-              <button key={r} onClick={() => setAspectRatio(r)}
-                style={{
-                  padding: '6px 12px', borderRadius: 8, border: '1px solid',
-                  borderColor: aspectRatio === r ? 'rgba(249,115,22,0.4)' : 'rgba(255,255,255,0.07)',
-                  background: aspectRatio === r ? 'rgba(249,115,22,0.08)' : 'transparent',
-                  color: aspectRatio === r ? '#f97316' : 'rgba(255,255,255,0.5)',
-                  fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                }}>
-                {r}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Style & Count */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-          <div style={card()}>
-            {label('Style')}
-            <select value={style} onChange={e => setStyle(e.target.value)}
-              style={{
-                width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 8, color: '#fff', fontSize: 13, padding: '8px 10px', outline: 'none',
-              }}>
-              {STYLES.map(s => <option key={s} value={s} style={{ background: '#16161f' }}>{s}</option>)}
-            </select>
-          </div>
-          <div style={card()}>
-            {label('Count')}
-            <div style={{ display: 'flex', gap: 6 }}>
-              {NUM_IMAGES.map(n => (
-                <button key={n} onClick={() => setNumImages(n)}
-                  style={{
-                    flex: 1, padding: '8px', borderRadius: 8, border: '1px solid',
-                    borderColor: numImages === n ? 'rgba(249,115,22,0.4)' : 'rgba(255,255,255,0.07)',
-                    background: numImages === n ? 'rgba(249,115,22,0.08)' : 'transparent',
-                    color: numImages === n ? '#f97316' : 'rgba(255,255,255,0.5)',
-                    fontSize: 13, fontWeight: 700, cursor: 'pointer',
-                  }}>
-                  {n}
-                </button>
+    <div className="grid grid-cols-[280px_1fr_260px] gap-5 h-[calc(100vh-200px)]">
+      {/* Left panel */}
+      <div className="border rounded-xl p-4 overflow-y-auto space-y-4">
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">FAL model</label>
+          <Select onValueChange={v => setValue('model', v)} defaultValue={FAL_MODELS.FLUX_DEV}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {MODEL_OPTIONS.map(m => (
+                <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-xs text-muted-foreground">Prompt</label>
+            <button onClick={handleOptimizePrompt} className="text-[10px] text-violet-600 hover:underline">
+              Optimize with Claude ↗
+            </button>
+          </div>
+          <Textarea {...register('prompt')} placeholder="A vibrant product photo..." className="min-h-[100px]" />
+          {errors.prompt && <p className="text-xs text-destructive mt-1">{errors.prompt.message}</p>}
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Negative prompt</label>
+          <Textarea {...register('negativePrompt')} placeholder="blurry, watermark..." className="min-h-[60px]" />
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">Width</label>
+            <Select onValueChange={(v: string) => setValue('width', Number(v))} defaultValue="1024">
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {[512, 768, 1024, 1280, 1536].map(n => <SelectItem key={n} value={String(n)}>{n}px</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">Height</label>
+            <Select onValueChange={(v: string) => setValue('height', Number(v))} defaultValue="1024">
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {[512, 768, 1024, 1280, 1536].map(n => <SelectItem key={n} value={String(n)}>{n}px</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <Button onClick={handleSubmit(onSubmit)} disabled={isGenerating} className="w-full">
+          {isGenerating ? 'Generating...' : 'Generate image'}
+        </Button>
+      </div>
+ 
+      {/* Canvas */}
+      <div className="border rounded-xl flex items-center justify-center bg-background overflow-hidden">
+        {!generatedUrl && !isGenerating && (
+          <div className="text-center text-muted-foreground">
+            <p className="text-sm">Your image will appear here</p>
+            <p className="text-xs mt-1 opacity-60">Configure settings and click generate</p>
+          </div>
+        )}
+        {isGenerating && (
+          <div className="text-center">
+            <div className="w-10 h-10 border-2 border-muted border-t-violet-500 rounded-full animate-spin mx-auto mb-3" />
+            <p className="text-sm text-muted-foreground">Generating with FAL AI...</p>
+          </div>
+        )}
+        {generatedUrl && (
+          <div className="flex flex-col items-center gap-4 p-4">
+            <Image src={generatedUrl} alt="Generated" width={512} height={512} className="rounded-lg max-h-[60vh] object-contain" />
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" asChild><a href={generatedUrl} download>Download</a></Button>
+              <Button size="sm">Publish to social</Button>
             </div>
           </div>
-        </div>
-
-        {/* Guidance */}
-        <div style={card()}>
-          {label(`Guidance Scale: ${guidanceScale}`)}
-          <input type="range" min={1} max={20} value={guidanceScale} onChange={e => setGuidanceScale(Number(e.target.value))}
-            style={{ width: '100%', accentColor: '#f97316' }} />
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'rgba(255,255,255,0.25)', marginTop: 4 }}>
-            <span>Creative</span><span>Precise</span>
-          </div>
-        </div>
-
-        {/* Generate */}
-        <button onClick={generate} disabled={loading || !prompt.trim()}
-          style={{
-            padding: '14px', borderRadius: 12, border: 'none', cursor: loading || !prompt.trim() ? 'not-allowed' : 'pointer',
-            background: loading || !prompt.trim() ? 'rgba(255,255,255,0.05)' : 'linear-gradient(135deg,#f97316,#ec4899)',
-            color: loading || !prompt.trim() ? 'rgba(255,255,255,0.3)' : '#fff',
-            fontSize: 14, fontWeight: 700, transition: 'all 0.2s',
-          }}>
-          {loading ? '⏳ Generating...' : '✦ Generate Images'}
-        </button>
-
-        {error && (
-          <div style={{ padding: '10px 14px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 10, color: '#EF4444', fontSize: 13 }}>
-            {error}
-          </div>
         )}
       </div>
-
-      {/* Results */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {images.length > 0 ? (
-          <div style={{ display: 'grid', gridTemplateColumns: images.length > 1 ? '1fr 1fr' : '1fr', gap: 12 }}>
-            {images.map((img, i) => (
-              <div key={i} style={{ position: 'relative', borderRadius: 14, overflow: 'hidden', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                <img src={img.url} alt={`Generated ${i + 1}`} style={{ width: '100%', height: 'auto', display: 'block' }} />
-                <div style={{ position: 'absolute', bottom: 10, right: 10, display: 'flex', gap: 6 }}>
-                  <a href={img.url} download={`image-${i + 1}.png`} target="_blank" rel="noreferrer"
-                    style={{
-                      padding: '6px 12px', borderRadius: 8, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)',
-                      color: '#fff', fontSize: 12, fontWeight: 600, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.15)',
-                    }}>
-                    ↓ Download
-                  </a>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div style={{
-            flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)', borderRadius: 14,
-            minHeight: 400, color: 'rgba(255,255,255,0.2)', gap: 12,
-          }}>
-            {loading ? (
-              <>
-                <div style={{ fontSize: 36 }}>✨</div>
-                <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)' }}>Generating your images...</div>
-                <div style={{ fontSize: 12 }}>This may take 10–30 seconds</div>
-              </>
-            ) : (
-              <>
-                <div style={{ fontSize: 48 }}>🖼️</div>
-                <div style={{ fontSize: 14 }}>Your generated images will appear here</div>
-              </>
-            )}
-          </div>
-        )}
+ 
+      {/* Right panel */}
+      <div className="border rounded-xl p-4 overflow-y-auto space-y-4">
+        <p className="text-sm font-medium">Output & publishing</p>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Format</label>
+          <Select onValueChange={v => setValue('outputFormat', v as 'jpeg' | 'png' | 'webp')} defaultValue="png">
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="png">PNG</SelectItem>
+              <SelectItem value="jpeg">JPEG</SelectItem>
+              <SelectItem value="webp">WebP</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <hr className="border-border" />
+        <p className="text-xs font-medium">Save to library automatically</p>
+        <p className="text-xs text-muted-foreground">All generated images are saved to your library for easy reuse and publishing.</p>
       </div>
     </div>
-  )
+  );
 }

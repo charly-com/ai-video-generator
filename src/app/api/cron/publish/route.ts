@@ -2,9 +2,9 @@
 // Called every minute by Vercel Cron or external cron service
 
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '../../../../../lib/db/prisma'
-import { publishToplatform } from '../../../../../lib/social/publishers';
-import type { SocialPlatform } from '../../../../../types/index';
+import { prisma } from '../../../../lib/db/prisma'
+import { publishToplatform } from '../../../../lib/social/publishers';
+import type { SocialPlatform } from '../../../../types/index';
 
 export async function GET(req: NextRequest) {
   // Verify cron secret

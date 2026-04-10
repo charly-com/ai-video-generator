@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
+// Bottom nav items for mobile
 const NAV_ITEMS = [
   { href: '/dashboard', icon: '🏠', label: 'Home', match: /^\/dashboard$/ },
   { href: '/dashboard/studio', icon: '🎬', label: 'Studio', match: /\/studio/ },
@@ -41,9 +42,10 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [streak] = useState(14)
-  const [xp] = useState(2840)
+  const [streak, setStreak] = useState(14)
+  const [xp, setXP] = useState(2840)
 
+  // Close sidebar when route changes
   useEffect(() => { setSidebarOpen(false) }, [pathname])
 
   const pageTitle = getPageTitle(pathname)
@@ -54,14 +56,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Desktop Sidebar */}
       <aside style={{
         width: 220, flexShrink: 0, background: '#0a0a14', borderRight: '1px solid rgba(255,255,255,0.05)',
-        display: 'flex', flexDirection: 'column', position: 'relative',
+        display: 'flex', flexDirection: 'column',
+        transform: sidebarOpen ? 'translateX(0)' : undefined,
+        position: 'relative',
       }} className="desktop-sidebar">
 
         {/* Logo */}
         <div style={{ padding: '16px 16px 12px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg,#F59E0B,#EF4444)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 14, color: '#000', flexShrink: 0 }}>V</div>
           <div>
-            <div style={{ fontWeight: 900, fontSize: 15, letterSpacing: '-0.02em' }}>ViralKit</div>
+            <div style={{ fontWeight: 900, fontSize: 15, letterSpacing: '-0.02em' }}>ViralMint</div>
             <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 1 }}>Basic Plan</div>
           </div>
         </div>
@@ -138,7 +142,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <div style={{ padding: '16px 16px 12px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg,#F59E0B,#EF4444)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 14, color: '#000' }}>V</div>
-            <span style={{ fontWeight: 900, fontSize: 16 }}>ViralKit</span>
+            <span style={{ fontWeight: 900, fontSize: 16 }}>ViralMint</span>
           </div>
           <button onClick={() => setSidebarOpen(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: 20, cursor: 'pointer', padding: 4 }}>✕</button>
         </div>
@@ -186,7 +190,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
         {/* Mobile topbar */}
         <header style={{ height: 56, display: 'flex', alignItems: 'center', padding: '0 14px', background: '#0a0a14', borderBottom: '1px solid rgba(255,255,255,0.05)', flexShrink: 0, gap: 12 }}>
-          <button onClick={() => setSidebarOpen(true)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: 20, cursor: 'pointer', padding: 4, lineHeight: 1 }} className="mobile-menu-btn">
+          <button onClick={() => setSidebarOpen(true)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: 20, cursor: 'pointer', padding: 4, lineHeight: 1, display: 'block' }} className="mobile-menu-btn">
             ☰
           </button>
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -223,6 +227,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               }}>
                 <span style={{ fontSize: 19, lineHeight: 1, filter: active ? 'none' : 'grayscale(0.5)' }}>{item.icon}</span>
                 <span style={{ fontSize: 9, fontWeight: active ? 700 : 400, letterSpacing: '0.02em' }}>{item.label}</span>
+                {active && <div style={{ position: 'absolute', bottom: 'calc(env(safe-area-inset-bottom) + 2px)', width: 4, height: 4, borderRadius: '50%', background: '#F59E0B' }} />}
               </Link>
             )
           })}
@@ -261,5 +266,5 @@ function getPageTitle(pathname: string): string {
     '/dashboard/publish': '📤 Publish Queue',
     '/dashboard/pricing': '💎 Upgrade Plan',
   }
-  return titles[pathname] ?? 'ViralKit'
+  return titles[pathname] ?? 'ViralMint'
 }

@@ -5,7 +5,7 @@ import type {
   GenerateVideoRequest,
   GenerateImageRequest,
   EditImageRequest,
-} from '../types';
+} from '../../types';
 
 export const FAL_MODELS = {
   FLUX_DEV: 'flux-dev',
