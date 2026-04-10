@@ -143,7 +143,7 @@ async function checkAndAwardBadges(userId: string, currentStreak: number): Promi
   const earnedBadgeIds = (await prisma.creatorBadge.findMany({
     where: { userId },
     select: { badgeId: true },
-  })).map(b => b.badgeId)
+  })).map((b: { badgeId: any; }) => b.badgeId)
 
   const toAward: Badge[] = []
 
