@@ -31,7 +31,7 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXTAUTH_URL ?? 'https://viralkit.app'),
+  metadataBase: new URL(process.env.NEXTAUTH_URL ?? 'https://viral.langtangihub.org'),
   title: {
     default: 'ViralKit — AI Content Studio',
     template: '%s | ViralKit',
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://viralkit.app',
+    url: 'https://viral.langtangihub.org',
     siteName: 'ViralKit',
     title: 'ViralKit — AI Content Studio',
     description: 'Create AI videos, images & go viral. One app for all your social content.',
