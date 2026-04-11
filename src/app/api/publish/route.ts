@@ -6,7 +6,7 @@ import { prisma } from '@/lib/db/prisma'
 import { publishToplatform } from '@/lib/social/publishers'
 import { generateCaption } from '@/lib/claude/claude'
 import { z } from 'zod'
-import type { ApiResponse, SocialPlatform } from '@/types'
+import type { ApiResponse, SocialAccount, SocialPlatform } from '@/types'
 
 const PublishSchema = z.object({
   contentId: z.string().cuid(),
@@ -115,7 +115,7 @@ export async function POST(req: NextRequest) {
             data: { status: 'publishing' },
           })
 
-          const result = await publishToplatform(account.platform as SocialPlatform, account, {
+          const result = await publishToplatform(account.platform as SocialPlatform, account as unknown as SocialAccount, {
             caption: caption ?? content.prompt,
             mediaUrl: content.fileUrl!,
             mediaType: content.type === 'video' ? 'video' : 'image',

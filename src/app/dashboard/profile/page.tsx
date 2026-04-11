@@ -1,4 +1,3 @@
-'use client'
 // src/app/dashboard/profile/page.tsx
 
 import { useState, useEffect } from 'react'
