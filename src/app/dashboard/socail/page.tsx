@@ -1,6 +1,8 @@
 'use client'
 // src/app/dashboard/social/page.tsx
 
+export const dynamic = 'force-dynamic'
+
 import { useState, useEffect, Suspense } from 'react'
 import { CheckCircle2, Plus, Trash2, ExternalLink, Globe, AlertCircle } from 'lucide-react'
 import { getPlatformColor } from '../../../lib/utils'

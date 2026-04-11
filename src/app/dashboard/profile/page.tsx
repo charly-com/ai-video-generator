@@ -1,6 +1,8 @@
 'use client'
 // src/app/dashboard/profile/page.tsx
 
+export const dynamic = 'force-dynamic'
+
 import { useState, useEffect } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { Flame, Trophy, Star, Settings, LogOut, Crown, Zap, Shield } from 'lucide-react'

@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import { Syne, DM_Sans } from 'next/font/google'
 import { Toaster } from 'react-hot-toast'
 import CookieConsent from '@/components/CookieConsent'
+import Providers from '@/components/Providers'
 import './globals.css'
 
 const syne = Syne({
@@ -104,24 +105,26 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-startup-image" href="/splash/splash-1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" />
       </head>
       <body className="bg-background text-foreground antialiased">
-        {children}
-        <CookieConsent />
-        <Toaster
-          position="top-center"
-          toastOptions={{
-            duration: 3500,
-            style: {
-              background: '#1a1a2e',
-              color: '#fff',
-              border: '1px solid rgba(249,115,22,0.3)',
-              borderRadius: '12px',
-              fontSize: '14px',
-              fontFamily: 'var(--font-dm)',
-            },
-            success: { iconTheme: { primary: '#f97316', secondary: '#fff' } },
-            error: { iconTheme: { primary: '#ef4444', secondary: '#fff' } },
-          }}
-        />
+        <Providers>
+          {children}
+          <CookieConsent />
+          <Toaster
+            position="top-center"
+            toastOptions={{
+              duration: 3500,
+              style: {
+                background: '#1a1a2e',
+                color: '#fff',
+                border: '1px solid rgba(249,115,22,0.3)',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontFamily: 'var(--font-dm)',
+              },
+              success: { iconTheme: { primary: '#f97316', secondary: '#fff' } },
+              error: { iconTheme: { primary: '#ef4444', secondary: '#fff' } },
+            }}
+          />
+        </Providers>
       </body>
     </html>
   )

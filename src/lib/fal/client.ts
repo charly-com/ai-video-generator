@@ -42,9 +42,15 @@ interface FalRembgResult {
 // ─── Video Generation ─────────────────────────────────────────────────────────
 
 export async function generateVideo(req: GenerateVideoRequest) {
+  const hasImage = !!req.imageUrl
+
   const modelEndpoints: Record<string, string> = {
-    'minimax-video-01': 'fal-ai/minimax-video/image-to-video',
-    'kling-video-v2-master': 'fal-ai/kling-video/v2/master/image-to-video',
+    'minimax-video-01': hasImage
+      ? 'fal-ai/minimax/video-01/image-to-video'
+      : 'fal-ai/minimax/video-01',
+    'kling-video-v2-master': hasImage
+      ? 'fal-ai/kling-video/v2/master/image-to-video'
+      : 'fal-ai/kling-video/v2/master/text-to-video',
     'wan-pro': 'fal-ai/wan/v2.2/1080p',
     'luma-dream-machine': 'fal-ai/luma-dream-machine',
   }
@@ -71,16 +77,16 @@ export async function generateVideo(req: GenerateVideoRequest) {
 }
 
 function buildVideoInput(req: GenerateVideoRequest) {
-  const base = {
+  const base: Record<string, unknown> = {
     prompt: req.prompt,
-    negative_prompt: req.negativePrompt,
-    seed: req.seed,
+    ...(req.negativePrompt ? { negative_prompt: req.negativePrompt } : {}),
+    ...(req.seed !== undefined ? { seed: req.seed } : {}),
   }
 
   if (req.model === 'minimax-video-01' || req.model === 'kling-video-v2-master') {
     return {
       ...base,
-      image_url: req.imageUrl,
+      ...(req.imageUrl ? { image_url: req.imageUrl } : {}),
       duration: req.duration,
       aspect_ratio: req.aspectRatio,
     }
@@ -89,7 +95,7 @@ function buildVideoInput(req: GenerateVideoRequest) {
   if (req.model === 'wan-pro') {
     return {
       ...base,
-      image_url: req.imageUrl,
+      ...(req.imageUrl ? { image_url: req.imageUrl } : {}),
       num_frames: req.duration * 24, // 24fps
       aspect_ratio: req.aspectRatio,
       resolution: '1080p',
@@ -99,13 +105,16 @@ function buildVideoInput(req: GenerateVideoRequest) {
   if (req.model === 'luma-dream-machine') {
     return {
       ...base,
-      image_url: req.imageUrl,
+      ...(req.imageUrl ? { image_url: req.imageUrl } : {}),
       duration: `${req.duration}s` as '5s',
       aspect_ratio: req.aspectRatio,
     }
   }
 
-  return { ...base, image_url: req.imageUrl }
+  return {
+    ...base,
+    ...(req.imageUrl ? { image_url: req.imageUrl } : {}),
+  }
 }
 
 // ─── Image Generation ─────────────────────────────────────────────────────────
