@@ -15,9 +15,9 @@ export const FAL_MODELS = {
   IDEOGRAM: 'ideogram-v3',
 } as const
 
-// Initialize fal client — key is set via FAL_KEY env var automatically
+// Initialize fal client — key read from FAL_API_KEY env var
 fal.config({
-  credentials: process.env.FAL_KEY!,
+  credentials: process.env.FAL_API_KEY!,
 })
 
 // ─── Types from fal.ai ────────────────────────────────────────────────────────

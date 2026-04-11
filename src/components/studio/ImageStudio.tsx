@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { FAL_MODELS } from '../../lib/fal';
+import { FAL_MODELS } from '../../lib/fal/client';
 import Image from 'next/image';
  
 const schema = z.object({
