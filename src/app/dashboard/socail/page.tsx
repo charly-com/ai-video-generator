@@ -1,8 +1,8 @@
 'use client'
 // src/app/dashboard/social/page.tsx
 
-import { useState, useEffect } from 'react'
-import { CheckCircle2, Plus, Trash2, ExternalLink, Users, Globe, AlertCircle } from 'lucide-react'
+import { useState, useEffect, Suspense } from 'react'
+import { CheckCircle2, Plus, Trash2, ExternalLink, Globe, AlertCircle } from 'lucide-react'
 import { getPlatformColor } from '../../../lib/utils'
 import toast from 'react-hot-toast'
 import { useSearchParams } from 'next/navigation'
@@ -25,7 +25,7 @@ interface SocialAccount {
   followers?: number
 }
 
-export default function SocialPage() {
+function SocialPageInner() {
   const [accounts, setAccounts]     = useState<SocialAccount[]>([])
   const [loading, setLoading]       = useState(true)
   const [connecting, setConnecting] = useState<string | null>(null)
@@ -166,5 +166,13 @@ export default function SocialPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function SocialPage() {
+  return (
+    <Suspense>
+      <SocialPageInner />
+    </Suspense>
   )
 }

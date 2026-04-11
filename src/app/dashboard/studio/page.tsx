@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 
 const MODELS = [
@@ -29,11 +29,10 @@ const STYLE_PRESETS = [
 
 type StudioStatus = 'idle' | 'scripting' | 'generating' | 'ready' | 'error'
 
-export default function VideoStudioPage() {
+function VideoStudioInner() {
   const searchParams = useSearchParams()
   const [model, setModel] = useState('minimax-video-01')
   const [prompt, setPrompt] = useState(searchParams.get('trend') ? `Create a viral video about ${searchParams.get('trend')}` : '')
-  const [script, setScript] = useState('')
   const [aspectRatio, setAspectRatio] = useState<'9:16' | '16:9' | '1:1'>('9:16')
   const [duration, setDuration] = useState(6)
   const [status, setStatus] = useState<StudioStatus>('idle')
@@ -284,5 +283,13 @@ export default function VideoStudioPage() {
         }
       `}</style>
     </div>
+  )
+}
+
+export default function VideoStudioPage() {
+  return (
+    <Suspense>
+      <VideoStudioInner />
+    </Suspense>
   )
 }
