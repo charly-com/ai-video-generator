@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useState, useEffect } from 'react'
 
 type Platform = 'All' | 'TK' | 'IG' | 'YT' | 'X' | 'LI'
@@ -39,10 +41,11 @@ export default function TrendRadarPage() {
   const [search, setSearch] = useState('')
   const [selectedTrend, setSelectedTrend] = useState<Trend | null>(null)
   const [generating, setGenerating] = useState<string | null>(null)
-  const [lastUpdate, setLastUpdate] = useState(new Date())
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null)
 
-  // Simulate live updates every 15 min
+  // Populate on client only to avoid SSR/client time mismatch
   useEffect(() => {
+    setLastUpdate(new Date())
     const interval = setInterval(() => setLastUpdate(new Date()), 15 * 60 * 1000)
     return () => clearInterval(interval)
   }, [])
@@ -74,7 +77,7 @@ export default function TrendRadarPage() {
                 <span style={{ fontSize: 10, color: '#EF4444', fontWeight: 700 }}>LIVE</span>
               </div>
             </div>
-            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginTop: 3 }}>Last updated: {lastUpdate.toLocaleTimeString()} · Refreshes every 15 min</p>
+            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginTop: 3 }}>Last updated: {lastUpdate ? lastUpdate.toLocaleTimeString() : '—'} · Refreshes every 15 min</p>
           </div>
           <button style={{ padding: '8px 14px', borderRadius: 8, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#EF4444', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
             🔔 Alert me on new trends
