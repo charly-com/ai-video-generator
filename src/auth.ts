@@ -9,6 +9,7 @@ import type { SocialPlatform } from './types'
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
+  trustHost: true,
   session: { strategy: 'database' },
   providers: [
     Google({

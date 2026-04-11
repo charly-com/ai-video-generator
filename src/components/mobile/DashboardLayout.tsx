@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { signOut } from 'next-auth/react'
 
 // Bottom nav items for mobile
 const NAV_ITEMS = [
@@ -112,14 +113,19 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
         {/* User footer */}
         <div style={{ padding: '12px 8px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 8, cursor: 'pointer' }}>
+          <Link href="/dashboard/profile" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 8, textDecoration: 'none' }}>
             <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg,#F59E0B,#EF4444)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#000', flexShrink: 0 }}>CK</div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 12, fontWeight: 600, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Charly K.</div>
               <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>32/50 videos used</div>
             </div>
-            <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.2)' }}>⚙️</span>
-          </div>
+          </Link>
+          <button
+            onClick={() => signOut({ callbackUrl: '/' })}
+            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', borderRadius: 8, background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(239,68,68,0.7)', fontSize: 12, fontWeight: 500 }}
+          >
+            <span style={{ fontSize: 14 }}>↪</span> Sign out
+          </button>
         </div>
       </aside>
 
@@ -180,9 +186,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           ))}
         </nav>
 
-        <Link href="/dashboard/pricing" style={{ margin: '0 12px 16px', display: 'block', textAlign: 'center', padding: '12px', borderRadius: 12, background: 'linear-gradient(135deg,#F59E0B,#EF4444)', color: '#000', fontWeight: 700, fontSize: 13, textDecoration: 'none' }}>
-          ✦ Upgrade to Pro
-        </Link>
+        <div style={{ padding: '0 12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <Link href="/dashboard/pricing" style={{ display: 'block', textAlign: 'center', padding: '12px', borderRadius: 12, background: 'linear-gradient(135deg,#F59E0B,#EF4444)', color: '#000', fontWeight: 700, fontSize: 13, textDecoration: 'none' }}>
+            ✦ Upgrade to Pro
+          </Link>
+          <button
+            onClick={() => signOut({ callbackUrl: '/' })}
+            style={{ width: '100%', padding: '10px', borderRadius: 10, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', color: '#EF4444', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
+          >
+            ↪ Sign out
+          </button>
+        </div>
       </div>
 
       {/* Main content */}
