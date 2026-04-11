@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import DashboardLayout from '../../../../components/mobile/DashboardLayout'
+import DashboardLayout from '../../../components/mobile/DashboardLayout'
 
 interface Challenge {
   id: string

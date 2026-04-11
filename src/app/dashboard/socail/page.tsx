@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react'
 import { CheckCircle2, Plus, Trash2, ExternalLink, Users, Globe, AlertCircle } from 'lucide-react'
-import { getPlatformColor } from '../../../../lib/utils'
+import { getPlatformColor } from '../../../lib/utils'
 import toast from 'react-hot-toast'
 import { useSearchParams } from 'next/navigation'
 

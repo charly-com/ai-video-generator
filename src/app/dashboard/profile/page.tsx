@@ -4,8 +4,8 @@
 import { useState, useEffect } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { Flame, Trophy, Star, Settings, LogOut, Crown, Zap, Shield } from 'lucide-react'
-import { BADGES, LEVELS, getLevel, getLevelProgress } from '../../../../lib/gamification/system'
-import { getInitials } from '../../../../lib/utils'
+import { BADGES, LEVELS, getLevel, getLevelProgress } from '../../../lib/gamification/system'
+import { getInitials } from '../../../lib/utils'
 import Link from 'next/link'
 
 interface StreakData {

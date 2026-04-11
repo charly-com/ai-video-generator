@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react'
 import { Calendar, Clock, CheckCircle2, XCircle, Loader2, Send, Filter, RefreshCw, Globe } from 'lucide-react'
-import { timeAgo, getPlatformEmoji, getPlatformColor } from '../../../../lib/utils'
+import { timeAgo, getPlatformEmoji, getPlatformColor } from '../../../lib/utils'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
 

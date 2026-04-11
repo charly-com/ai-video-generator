@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import DashboardLayout from '../../../../components/mobile/DashboardLayout'
+import DashboardLayout from '../../../components/mobile/DashboardLayout'
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']

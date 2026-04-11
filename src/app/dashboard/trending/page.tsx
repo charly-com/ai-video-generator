@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import DashboardLayout from '../../../../components/mobile/DashboardLayout'
+import DashboardLayout from '../../../components/mobile/DashboardLayout'
 
 type Platform = 'All' | 'TK' | 'IG' | 'YT' | 'X' | 'LI'
 type TrendCategory = 'hashtag' | 'sound' | 'challenge' | 'topic'
