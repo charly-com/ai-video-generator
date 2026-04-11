@@ -92,7 +92,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${syne.variable} ${dmSans.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${syne.variable} ${dmSans.variable}`} suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
         {/* PWA iOS specific */}
         <meta name="apple-mobile-web-app-capable" content="yes" />

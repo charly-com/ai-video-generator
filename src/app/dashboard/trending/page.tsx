@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import DashboardLayout from '../../../components/mobile/DashboardLayout'
 
 type Platform = 'All' | 'TK' | 'IG' | 'YT' | 'X' | 'LI'
 type TrendCategory = 'hashtag' | 'sound' | 'challenge' | 'topic'
@@ -64,8 +63,7 @@ export default function TrendRadarPage() {
   }
 
   return (
-    <DashboardLayout>
-      <div style={{ padding: 16, maxWidth: 900, margin: '0 auto' }}>
+    <div style={{ padding: 16, maxWidth: 900, margin: '0 auto' }}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 10 }}>
           <div>
@@ -179,11 +177,10 @@ export default function TrendRadarPage() {
             <div style={{ fontSize: 14 }}>No trends match your filters</div>
           </div>
         )}
-      </div>
 
-      <style>{`
-        @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: 0.4 } }
-      `}</style>
-    </DashboardLayout>
+        <style>{`
+          @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: 0.4 } }
+        `}</style>
+      </div>
   )
 }

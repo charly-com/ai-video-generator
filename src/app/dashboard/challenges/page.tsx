@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import DashboardLayout from '../../../components/mobile/DashboardLayout'
+
 
 interface Challenge {
   id: string
@@ -81,8 +81,7 @@ export default function ChallengesPage() {
   const lockedAchievements = ACHIEVEMENTS.filter(a => !a.unlocked)
 
   return (
-    <DashboardLayout>
-      <div style={{ padding: 16, maxWidth: 900, margin: '0 auto' }}>
+    <div style={{ padding: 16, maxWidth: 900, margin: '0 auto' }}>
 
         {/* Profile card */}
         <div style={{ padding: 20, background: 'linear-gradient(135deg, rgba(245,158,11,0.1), rgba(239,68,68,0.06))', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 20, marginBottom: 20 }}>
@@ -229,7 +228,6 @@ export default function ChallengesPage() {
           </div>
         )}
       </div>
-    </DashboardLayout>
   )
 }
 
