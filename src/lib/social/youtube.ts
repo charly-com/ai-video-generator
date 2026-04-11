@@ -36,11 +36,11 @@ export async function handleYouTubeCallback(code: string, userId: string) {
       platformUserId: channel?.id ?? '',
       username: channel?.snippet?.title ?? '',
       displayName: channel?.snippet?.title ?? '',
-      avatarUrl: channel?.snippet?.thumbnails?.default?.url ?? '',
+      profileImageUrl: channel?.snippet?.thumbnails?.default?.url ?? '',
       accessToken: tokens.access_token!,
       refreshToken: tokens.refresh_token ?? undefined,
       tokenExpiresAt: tokens.expiry_date ? new Date(tokens.expiry_date) : undefined,
-      metadata: { subscriberCount: channel?.statistics?.subscriberCount },
+      followers: parseInt(channel?.statistics?.subscriberCount ?? '0', 10) || 0,
     },
     update: {
       accessToken: tokens.access_token!,

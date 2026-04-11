@@ -58,10 +58,10 @@ export async function handleInstagramCallback(code: string, userId: string) {
       platformUserId: igAccountId,
       username: igUser.username,
       displayName: igUser.username,
-      avatarUrl: igUser.profile_picture_url,
+      profileImageUrl: igUser.profile_picture_url,
       accessToken: page.access_token,
       tokenExpiresAt: new Date(Date.now() + longToken.expires_in * 1000),
-      metadata: { followersCount: igUser.followers_count },
+      followers: igUser.followers_count,
     },
     update: { accessToken: page.access_token, isActive: true },
   });
