@@ -18,6 +18,7 @@ const SIDEBAR_ITEMS = [
   { section: 'Create', items: [
     { href: '/dashboard/studio', icon: '🎬', label: 'Video Studio', badge: 'AI' },
     { href: '/dashboard/studio/image', icon: '🖼️', label: 'Image Studio', badge: 'AI' },
+    { href: '/dashboard/templates', icon: '✦', label: 'Templates' },
     { href: '/dashboard/brand-kit', icon: '🎨', label: 'Brand Kit' },
   ]},
   { section: 'Grow', items: [
@@ -276,6 +277,7 @@ function getPageTitle(pathname: string): string {
     '/dashboard/analytics': '📊 Analytics',
     '/dashboard/social': '🔗 Social Accounts',
     '/dashboard/challenges': '🏆 Challenges',
+    '/dashboard/templates': '✦ Templates',
     '/dashboard/brand-kit': '🎨 Brand Kit',
     '/dashboard/publish': '📤 Publish Queue',
     '/dashboard/pricing': '💎 Upgrade Plan',

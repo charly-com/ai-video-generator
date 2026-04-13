@@ -34,7 +34,7 @@ type StudioStatus = 'idle' | 'scripting' | 'generating' | 'ready' | 'error'
 function VideoStudioInner() {
   const searchParams = useSearchParams()
   const [model, setModel] = useState('minimax-video-01')
-  const [prompt, setPrompt] = useState(searchParams.get('trend') ? `Create a viral video about ${searchParams.get('trend')}` : '')
+  const [prompt, setPrompt] = useState(searchParams.get('trend') ? `Create a viral video about ${searchParams.get('trend')}` : (searchParams.get('prompt') ?? ''))
   const [aspectRatio, setAspectRatio] = useState<'9:16' | '16:9' | '1:1'>('9:16')
   const [duration, setDuration] = useState(6)
   const [status, setStatus] = useState<StudioStatus>('idle')
@@ -45,10 +45,12 @@ function VideoStudioInner() {
   const [imageUrl, setImageUrl] = useState('')
   const progressRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  // If trend param pre-fill
+  // If trend or template prompt param pre-fill
   useEffect(() => {
     const trend = searchParams.get('trend')
+    const templatePrompt = searchParams.get('prompt')
     if (trend) setPrompt(`Create a viral video capitalizing on the ${trend} trend. Hook viewer in first 2 seconds, show high energy content.`)
+    else if (templatePrompt) setPrompt(templatePrompt)
   }, [searchParams])
 
   async function generateScript() {
@@ -92,11 +94,13 @@ function VideoStudioInner() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt, model, aspectRatio, duration, imageUrl: imageUrl || undefined }),
       })
-      const data = await res.json()
+      const text = await res.text()
+      let data: { success: boolean; data?: { fileUrl: string }; error?: string }
+      try { data = JSON.parse(text) } catch { throw new Error('Server error — check your FAL_KEY and try again') }
       clearInterval(progressRef.current!)
-      if (data.success) {
+      if (data.success && data.data) {
         setProgress(100)
-        setTimeout(() => { setVideoUrl(data.data.fileUrl); setStatus('ready') }, 500)
+        setTimeout(() => { setVideoUrl(data.data!.fileUrl); setStatus('ready') }, 500)
       } else {
         setError(data.error || 'Generation failed')
         setStatus('error')

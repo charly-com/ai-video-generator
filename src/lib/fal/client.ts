@@ -17,7 +17,7 @@ export const FAL_MODELS = {
 
 // Initialize fal client — key read from FAL_API_KEY env var
 fal.config({
-  credentials: process.env.FAL_API_KEY!,
+  credentials: process.env.FAL_KEY!,
 })
 
 // ─── Types from fal.ai ────────────────────────────────────────────────────────
