@@ -15,10 +15,11 @@ export const FAL_MODELS = {
   IDEOGRAM: 'ideogram-v3',
 } as const
 
-// Initialize fal client — key read from FAL_API_KEY env var
-fal.config({
-  credentials: process.env.FAL_KEY!,
-})
+// Initialize fal client — reads FAL_API_KEY (or FAL_KEY as fallback)
+const falCredentials = process.env.FAL_API_KEY ?? process.env.FAL_KEY
+if (falCredentials) {
+  fal.config({ credentials: falCredentials })
+}
 
 // ─── Types from fal.ai ────────────────────────────────────────────────────────
 
@@ -241,7 +242,7 @@ function aspectRatioToDimensions(ratio: string): [number, number] {
   return map[ratio] ?? [1024, 1024]
 }
 
-export function estimateCost(model: string, type: 'video' | 'image'): number {
+export function estimateCost(model: string, _type: 'video' | 'image'): number {
   const costs: Record<string, number> = {
     'minimax-video-01': 0.05,
     'kling-video-v2-master': 0.14,
