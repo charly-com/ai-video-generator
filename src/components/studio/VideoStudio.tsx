@@ -39,6 +39,9 @@ export function VideoStudio() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [videoUrl, setVideoUrl] = useState('')
+  const [addAudio, setAddAudio] = useState(true)
+  const [audioPrompt, setAudioPrompt] = useState('')
+  const [downloading, setDownloading] = useState(false)
 
   async function generate() {
     if (!prompt.trim()) return
@@ -46,7 +49,7 @@ export function VideoStudio() {
     setError('')
     setVideoUrl('')
     try {
-      const res = await fetch('/api/ai/generate-video', {
+      const res = await fetch('/api/generate/video', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -56,6 +59,8 @@ export function VideoStudio() {
           duration,
           imageUrl: imageUrl.trim() || undefined,
           negativePrompt: negativePrompt.trim() || undefined,
+          addAudio,
+          audioPrompt: audioPrompt.trim() || undefined,
         }),
       })
       const json = await res.json()
@@ -65,6 +70,30 @@ export function VideoStudio() {
       setError(e instanceof Error ? e.message : 'Video generation failed')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function downloadVideo() {
+    if (!videoUrl) return
+    setDownloading(true)
+    try {
+      const name = `viralmint-${Date.now()}.mp4`
+      const proxyUrl = `/api/download?url=${encodeURIComponent(videoUrl)}&name=${encodeURIComponent(name)}`
+      const res = await fetch(proxyUrl)
+      if (!res.ok) throw new Error('Download failed')
+      const blob = await res.blob()
+      const blobUrl = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = blobUrl
+      a.download = name
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 1000)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Download failed')
+    } finally {
+      setDownloading(false)
     }
   }
 
@@ -162,6 +191,29 @@ export function VideoStudio() {
           />
         </div>
 
+        {/* Audio */}
+        <div style={card()}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', marginBottom: 8 }}>
+            <input type="checkbox" checked={addAudio} onChange={e => setAddAudio(e.target.checked)}
+              style={{ width: 16, height: 16, accentColor: '#f97316' }} />
+            <span style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>🔊 Generate AI audio</span>
+          </label>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: addAudio ? 10 : 0 }}>
+            Adds a matching soundtrack &amp; effects to the video
+          </div>
+          {addAudio && (
+            <input
+              value={audioPrompt}
+              onChange={e => setAudioPrompt(e.target.value)}
+              placeholder="Audio description (optional — uses video prompt)"
+              style={{
+                width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: 8, color: '#fff', fontSize: 12, padding: '8px 12px', outline: 'none', boxSizing: 'border-box',
+              }}
+            />
+          )}
+        </div>
+
         {/* Generate */}
         <button onClick={generate} disabled={loading || !prompt.trim()}
           style={{
@@ -186,12 +238,20 @@ export function VideoStudio() {
           <div style={{ borderRadius: 14, overflow: 'hidden', background: '#000', border: '1px solid rgba(255,255,255,0.07)' }}>
             <video src={videoUrl} controls autoPlay loop style={{ width: '100%', display: 'block' }} />
             <div style={{ padding: '12px 16px', display: 'flex', gap: 8 }}>
-              <a href={videoUrl} download="video.mp4" target="_blank" rel="noreferrer"
+              <button onClick={downloadVideo} disabled={downloading}
                 style={{
-                  padding: '8px 16px', borderRadius: 8, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)',
+                  padding: '8px 16px', borderRadius: 8, background: downloading ? 'rgba(255,255,255,0.04)' : 'linear-gradient(135deg,#F59E0B,#EF4444)',
+                  border: 'none', color: downloading ? 'rgba(255,255,255,0.3)' : '#000',
+                  fontSize: 13, fontWeight: 700, cursor: downloading ? 'not-allowed' : 'pointer',
+                }}>
+                {downloading ? '⏳ Downloading...' : '↓ Download to device'}
+              </button>
+              <a href={videoUrl} target="_blank" rel="noreferrer"
+                style={{
+                  padding: '8px 14px', borderRadius: 8, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
                   color: '#fff', fontSize: 13, fontWeight: 600, textDecoration: 'none',
                 }}>
-                ↓ Download
+                ↗ Open
               </a>
             </div>
           </div>

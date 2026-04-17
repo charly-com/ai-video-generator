@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { signOut } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 
 // Bottom nav items for mobile
 const NAV_ITEMS = [
@@ -43,12 +43,21 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const pathname = usePathname()
+  const { data: session } = useSession()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [streak, setStreak] = useState(14)
   const [xp, setXP] = useState(2840)
 
   // Close sidebar when route changes
   useEffect(() => { setSidebarOpen(false) }, [pathname])
+
+  const isAdmin = session?.user?.isAdmin === true
+
+  const sidebarSections = isAdmin
+    ? [...SIDEBAR_ITEMS, { section: 'Admin', items: [
+        { href: '/dashboard/admin', icon: '👑', label: 'Admin Dashboard', badge: 'ADMIN' },
+      ]}]
+    : SIDEBAR_ITEMS
 
   const pageTitle = getPageTitle(pathname)
 
@@ -88,7 +97,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
         {/* Nav */}
         <nav style={{ flex: 1, overflowY: 'auto', padding: '8px 8px' }}>
-          {SIDEBAR_ITEMS.map(section => (
+          {sidebarSections.map(section => (
             <div key={section.section} style={{ marginBottom: 20 }}>
               <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', padding: '0 8px', marginBottom: 4 }}>{section.section}</div>
               {section.items.map(item => {
@@ -163,7 +172,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
 
         <nav style={{ flex: 1, overflowY: 'auto', padding: '8px 8px' }}>
-          {SIDEBAR_ITEMS.map(section => (
+          {sidebarSections.map(section => (
             <div key={section.section} style={{ marginBottom: 20 }}>
               <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', padding: '0 8px', marginBottom: 4 }}>{section.section}</div>
               {section.items.map(item => {
@@ -281,6 +290,7 @@ function getPageTitle(pathname: string): string {
     '/dashboard/brand-kit': '🎨 Brand Kit',
     '/dashboard/publish': '📤 Publish Queue',
     '/dashboard/pricing': '💎 Upgrade Plan',
+    '/dashboard/admin': '👑 Admin Dashboard',
   }
   return titles[pathname] ?? 'ViralMint'
 }
