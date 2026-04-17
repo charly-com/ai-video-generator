@@ -16,6 +16,8 @@ const GenerateVideoSchema = z.object({
   imageUrl: z.string().url().optional(),
   negativePrompt: z.string().max(500).optional(),
   seed: z.number().optional(),
+  addAudio: z.boolean().optional(),
+  audioPrompt: z.string().max(500).optional(),
 })
 
 export async function POST(req: NextRequest) {

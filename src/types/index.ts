@@ -331,6 +331,8 @@ export interface GenerateVideoRequest {
   imageUrl?: string       // for image-to-video
   negativePrompt?: string
   seed?: number
+  addAudio?: boolean      // default true — post-process video to add AI audio
+  audioPrompt?: string    // overrides the audio prompt (defaults to video prompt)
 }
 
 export interface GenerateImageRequest {

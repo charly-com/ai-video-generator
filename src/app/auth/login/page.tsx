@@ -2,30 +2,42 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 
 export default function LoginPage() {
+  const router = useRouter()
   const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState<string | null>(null)
-  const [sent, setSent] = useState(false)
+  const [error, setError] = useState('')
 
   async function handleGoogle() {
     setLoading('google')
     await signIn('google', { callbackUrl: '/dashboard' })
   }
 
-  async function handleEmail(e: React.FormEvent) {
+  async function handlePassword(e: React.FormEvent) {
     e.preventDefault()
-    if (!email.trim()) return
-    setLoading('email')
-    await signIn('email', { email, callbackUrl: '/dashboard', redirect: false })
-    setSent(true)
+    if (!email.trim() || !password) return
+    setLoading('password')
+    setError('')
+    const res = await signIn('credentials', {
+      email,
+      password,
+      redirect: false,
+    })
     setLoading(null)
+    if (res?.error) {
+      setError('Invalid email or password')
+      return
+    }
+    router.push('/dashboard')
+    router.refresh()
   }
 
   return (
     <div style={{ minHeight: '100dvh', background: '#07070F', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px 16px', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
-      {/* Logo */}
       <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', marginBottom: 40 }}>
         <div style={{ width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg,#F59E0B,#EF4444)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 16, color: '#000' }}>V</div>
         <span style={{ fontWeight: 900, fontSize: 20, color: '#fff', letterSpacing: '-0.02em' }}>ViralKit</span>
@@ -37,7 +49,6 @@ export default function LoginPage() {
           <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)' }}>Sign in to your ViralKit studio</p>
         </div>
 
-        {/* Google */}
         <button onClick={handleGoogle} disabled={!!loading}
           style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, padding: '14px', borderRadius: 14, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', fontSize: 15, fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer', marginBottom: 16, fontFamily: 'inherit', transition: 'all 0.15s', opacity: loading === 'google' ? 0.7 : 1 }}>
           {loading === 'google' ? '⏳ Signing in...' : (
@@ -54,23 +65,23 @@ export default function LoginPage() {
           <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
         </div>
 
-        {sent ? (
-          <div style={{ textAlign: 'center', padding: '24px', background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: 14 }}>
-            <div style={{ fontSize: 36, marginBottom: 12 }}>📧</div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: '#fff', marginBottom: 8 }}>Check your email</div>
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6 }}>We sent a sign-in link to <strong style={{ color: '#fff' }}>{email}</strong></div>
-          </div>
-        ) : (
-          <form onSubmit={handleEmail}>
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-              placeholder="your@email.com"
-              style={{ width: '100%', padding: '13px 15px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, color: '#fff', fontSize: 15, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: 12 }} />
-            <button type="submit" disabled={!email.trim() || !!loading}
-              style={{ width: '100%', padding: '14px', borderRadius: 12, background: email.trim() ? 'linear-gradient(135deg,#F59E0B,#EF4444)' : 'rgba(255,255,255,0.05)', border: 'none', color: email.trim() ? '#000' : 'rgba(255,255,255,0.3)', fontSize: 15, fontWeight: 700, cursor: email.trim() ? 'pointer' : 'not-allowed', fontFamily: 'inherit', transition: 'all 0.15s' }}>
-              {loading === 'email' ? '⏳ Sending...' : 'Send magic link →'}
-            </button>
-          </form>
-        )}
+        <form onSubmit={handlePassword}>
+          <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+            placeholder="your@email.com" autoComplete="email" required
+            style={{ width: '100%', padding: '13px 15px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, color: '#fff', fontSize: 15, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: 10 }} />
+          <input type="password" value={password} onChange={e => setPassword(e.target.value)}
+            placeholder="Password" autoComplete="current-password" required
+            style={{ width: '100%', padding: '13px 15px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, color: '#fff', fontSize: 15, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: 12 }} />
+          {error && (
+            <div style={{ padding: '10px 12px', marginBottom: 10, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 10, color: '#EF4444', fontSize: 13 }}>
+              {error}
+            </div>
+          )}
+          <button type="submit" disabled={!email.trim() || !password || !!loading}
+            style={{ width: '100%', padding: '14px', borderRadius: 12, background: email.trim() && password ? 'linear-gradient(135deg,#F59E0B,#EF4444)' : 'rgba(255,255,255,0.05)', border: 'none', color: email.trim() && password ? '#000' : 'rgba(255,255,255,0.3)', fontSize: 15, fontWeight: 700, cursor: email.trim() && password ? 'pointer' : 'not-allowed', fontFamily: 'inherit', transition: 'all 0.15s' }}>
+            {loading === 'password' ? '⏳ Signing in...' : 'Sign in →'}
+          </button>
+        </form>
 
         <p style={{ textAlign: 'center', fontSize: 13, color: 'rgba(255,255,255,0.35)', marginTop: 24 }}>
           Don&apos;t have an account?{' '}

@@ -71,8 +71,55 @@ export async function generateVideo(req: GenerateVideoRequest) {
     },
   }) as unknown as { data: FalVideoResult; requestId: string }
 
+  let fileUrl = result.data.video.url
+  const falRequestId = result.requestId
+
+  // Post-process: add AI-generated audio track to the silent video.
+  // Skipped automatically if `addAudio === false` or if the step fails.
+  if (req.addAudio !== false) {
+    try {
+      const withAudio = await addAudioToVideo({
+        videoUrl: fileUrl,
+        prompt: req.audioPrompt || req.prompt,
+        duration: req.duration,
+      })
+      if (withAudio?.videoUrl) fileUrl = withAudio.videoUrl
+    } catch (err) {
+      console.warn('[fal] Audio generation failed, returning silent video:', err)
+    }
+  }
+
   return {
-    fileUrl: result.data.video.url,
+    fileUrl,
+    falRequestId,
+  }
+}
+
+// ─── Audio Generation (MMAudio V2) ────────────────────────────────────────────
+
+interface FalMMAudioResult {
+  video: { url: string; content_type: string; file_size: number }
+}
+
+export async function addAudioToVideo(input: {
+  videoUrl: string
+  prompt: string
+  duration?: number
+  negativePrompt?: string
+}) {
+  const result = await fal.subscribe('fal-ai/mmaudio-v2', {
+    input: {
+      video_url: input.videoUrl,
+      prompt: input.prompt,
+      ...(input.negativePrompt ? { negative_prompt: input.negativePrompt } : {}),
+      ...(input.duration ? { duration: input.duration } : {}),
+      num_steps: 25,
+    },
+    logs: false,
+  }) as unknown as { data: FalMMAudioResult; requestId: string }
+
+  return {
+    videoUrl: result.data.video.url,
     falRequestId: result.requestId,
   }
 }
