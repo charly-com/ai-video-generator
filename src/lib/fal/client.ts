@@ -133,11 +133,22 @@ function buildVideoInput(req: GenerateVideoRequest) {
     ...(req.seed !== undefined ? { seed: req.seed } : {}),
   }
 
-  if (req.model === 'minimax-video-01' || req.model === 'kling-video-v2-master') {
+  if (req.model === 'minimax-video-01') {
+    // MiniMax always generates 6s — duration param not accepted
     return {
       ...base,
       ...(req.imageUrl ? { image_url: req.imageUrl } : {}),
-      duration: req.duration,
+      aspect_ratio: req.aspectRatio,
+    }
+  }
+
+  if (req.model === 'kling-video-v2-master') {
+    // Kling accepts duration as string enum "5" or "10"
+    const klingDuration = req.duration >= 10 ? '10' : '5'
+    return {
+      ...base,
+      ...(req.imageUrl ? { image_url: req.imageUrl } : {}),
+      duration: klingDuration,
       aspect_ratio: req.aspectRatio,
     }
   }

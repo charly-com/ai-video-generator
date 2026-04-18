@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect } from 'react'
 import { useSession, signOut } from 'next-auth/react'
-import { Trophy, Settings, LogOut, Crown, Zap, Shield, KeyRound, ChevronDown } from 'lucide-react'
+import { Trophy, Settings, LogOut, Crown, Zap, Shield, KeyRound, ChevronDown, Eye, EyeOff } from 'lucide-react'
 import { BADGES, LEVELS, getLevel, getLevelProgress } from '../../../lib/gamification/system'
 import { getInitials } from '../../../lib/utils'
 import Link from 'next/link'
@@ -27,6 +27,9 @@ export default function ProfilePage() {
   const [pwLoading, setPwLoading]         = useState(false)
   const [pwError, setPwError]             = useState('')
   const [pwSuccess, setPwSuccess]         = useState(false)
+  const [showCurrent, setShowCurrent]     = useState(false)
+  const [showNew, setShowNew]             = useState(false)
+  const [showConfirm, setShowConfirm]     = useState(false)
 
   async function handleChangePw(e: React.FormEvent) {
     e.preventDefault()
@@ -181,18 +184,39 @@ export default function ProfilePage() {
               <p className="text-[13px] text-green-400 py-3 text-center">✓ Password updated successfully!</p>
             ) : (
               <form onSubmit={handleChangePw} className="space-y-2 pt-3">
-                <input
-                  type="password" value={currentPw} onChange={e => setCurrentPw(e.target.value)}
-                  placeholder="Current password" required autoComplete="current-password"
-                  className="input-dark w-full px-3 py-2.5 text-[14px]" />
-                <input
-                  type="password" value={newPw} onChange={e => setNewPw(e.target.value)}
-                  placeholder="New password (min 6 chars)" required autoComplete="new-password"
-                  className="input-dark w-full px-3 py-2.5 text-[14px]" />
-                <input
-                  type="password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)}
-                  placeholder="Confirm new password" required autoComplete="new-password"
-                  className="input-dark w-full px-3 py-2.5 text-[14px]" />
+                {/* Current password */}
+                <div className="relative">
+                  <input
+                    type={showCurrent ? 'text' : 'password'} value={currentPw} onChange={e => setCurrentPw(e.target.value)}
+                    placeholder="Current password" required autoComplete="current-password"
+                    className="input-dark w-full px-3 py-2.5 text-[14px] pr-10" />
+                  <button type="button" onClick={() => setShowCurrent(p => !p)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }}>
+                    {showCurrent ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+                {/* New password */}
+                <div className="relative">
+                  <input
+                    type={showNew ? 'text' : 'password'} value={newPw} onChange={e => setNewPw(e.target.value)}
+                    placeholder="New password (min 6 chars)" required autoComplete="new-password"
+                    className="input-dark w-full px-3 py-2.5 text-[14px] pr-10" />
+                  <button type="button" onClick={() => setShowNew(p => !p)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }}>
+                    {showNew ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+                {/* Confirm new password */}
+                <div className="relative">
+                  <input
+                    type={showConfirm ? 'text' : 'password'} value={confirmPw} onChange={e => setConfirmPw(e.target.value)}
+                    placeholder="Confirm new password" required autoComplete="new-password"
+                    className="input-dark w-full px-3 py-2.5 text-[14px] pr-10" />
+                  <button type="button" onClick={() => setShowConfirm(p => !p)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }}>
+                    {showConfirm ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
                 {pwError && (
                   <p className="text-[12px] text-red-400 px-1">{pwError}</p>
                 )}

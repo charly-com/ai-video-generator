@@ -9,6 +9,7 @@ export default function LoginPage() {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPw, setShowPw] = useState(false)
   const [loading, setLoading] = useState<string | null>(null)
   const [error, setError] = useState('')
 
@@ -69,9 +70,15 @@ export default function LoginPage() {
           <input type="email" value={email} onChange={e => setEmail(e.target.value)}
             placeholder="your@email.com" autoComplete="email" required
             style={{ width: '100%', padding: '13px 15px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, color: '#fff', fontSize: 15, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: 10 }} />
-          <input type="password" value={password} onChange={e => setPassword(e.target.value)}
-            placeholder="Password" autoComplete="current-password" required
-            style={{ width: '100%', padding: '13px 15px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, color: '#fff', fontSize: 15, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: 6 }} />
+          <div style={{ position: 'relative', marginBottom: 6 }}>
+            <input type={showPw ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
+              placeholder="Password" autoComplete="current-password" required
+              style={{ width: '100%', padding: '13px 42px 13px 15px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, color: '#fff', fontSize: 15, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+            <button type="button" onClick={() => setShowPw(p => !p)}
+              style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.3)', padding: 0, display: 'flex', alignItems: 'center' }}>
+              {showPw ? '🙈' : '👁️'}
+            </button>
+          </div>
           <div style={{ textAlign: 'right', marginBottom: 12 }}>
             <Link href="/auth/forgot-password" style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', textDecoration: 'none' }}>Forgot password?</Link>
           </div>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 
 interface UsageData {
   videosUsed: number
@@ -35,13 +36,30 @@ const PLATFORM_COLORS: Record<string, string> = {
 }
 
 export default function DashboardPage() {
-  const [usage] = useState<UsageData>({ videosUsed: 32, videosLimit: 50, imagesUsed: 147, imagesLimit: 300, accountsConnected: 4, accountsLimit: 5 })
-  const [streak] = useState(14)
+  const { data: session } = useSession()
+  const [usage, setUsage] = useState<UsageData>({ videosUsed: 0, videosLimit: 10, imagesUsed: 0, imagesLimit: 50, accountsConnected: 0, accountsLimit: 3 })
+  const [streak, setStreak] = useState(0)
   const [greeting, setGreeting] = useState('Good morning')
 
   useEffect(() => {
     const h = new Date().getHours()
     setGreeting(h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening')
+    fetch('/api/gamification/streak').then(r => r.json()).then(j => {
+      if (j.success) setStreak(j.data.current ?? 0)
+    }).catch(() => {})
+    fetch('/api/billing').then(r => r.json()).then(j => {
+      if (j.success && j.data) {
+        const d = j.data
+        setUsage({
+          videosUsed: d.usage?.videosGenerated ?? 0,
+          videosLimit: d.usage?.videosLimit ?? 10,
+          imagesUsed: d.usage?.imagesGenerated ?? 0,
+          imagesLimit: d.usage?.imagesLimit ?? 50,
+          accountsConnected: 0,
+          accountsLimit: 3,
+        })
+      }
+    }).catch(() => {})
   }, [])
 
   const videoPct = Math.round((usage.videosUsed / usage.videosLimit) * 100)
@@ -53,7 +71,7 @@ export default function DashboardPage() {
       {/* Greeting */}
       <div style={{ marginBottom: 20 }}>
         <h1 style={{ fontSize: 22, fontWeight: 800, color: '#fff', marginBottom: 4 }}>
-          {greeting}, Charly 👋
+          {greeting}, {session?.user?.name?.split(' ')[0] ?? 'Creator'} 👋
         </h1>
         <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>
           🔥 {streak}-day streak · You&apos;re on a roll. Keep publishing today!

@@ -88,7 +88,7 @@ export default function BrandPage() {
 
   if (!isPro && kits.length === 0 && !creating) {
     return (
-      <div className="max-w-2xl mx-auto pb-24">
+      <div className="max-w-2xl mx-auto px-4 pt-5 pb-24 sm:px-6 sm:pt-6">
         <h1 className="font-syne font-700 text-[22px] text-white mb-1">Brand Kit</h1>
         <p className="text-[13px] mb-6" style={{ color: 'var(--text-secondary)' }}>Save your brand identity</p>
         <div className="rounded-2xl p-8 text-center" style={{ background: 'var(--bg-card)', border: '1px solid rgba(249,115,22,0.2)' }}>
@@ -104,7 +104,7 @@ export default function BrandPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-4 pb-24">
+    <div className="max-w-2xl mx-auto space-y-4 px-4 pt-5 pb-24 sm:px-6 sm:pt-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-syne font-700 text-[22px] text-white">Brand Kit</h1>
