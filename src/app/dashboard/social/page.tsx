@@ -4,7 +4,7 @@
 export const dynamic = 'force-dynamic'
 
 import { useState, useEffect, Suspense } from 'react'
-import { CheckCircle2, Plus, Trash2, ExternalLink, Globe, AlertCircle } from 'lucide-react'
+import { CheckCircle2, Plus, Trash2, Globe, AlertCircle } from 'lucide-react'
 import { getPlatformColor } from '../../../lib/utils'
 import toast from 'react-hot-toast'
 import { useSearchParams } from 'next/navigation'
@@ -78,7 +78,7 @@ function SocialPageInner() {
   const connectedPlatforms = new Set(accounts.map(a => a.platform))
 
   return (
-    <div className="max-w-2xl mx-auto space-y-4 pb-24">
+    <div className="max-w-2xl mx-auto space-y-4 px-4 pt-5 pb-24 sm:px-6 sm:pt-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

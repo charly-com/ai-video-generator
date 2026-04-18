@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
+import { getInitials } from '../../lib/utils'
 
 // Bottom nav items for mobile
 const NAV_ITEMS = [
@@ -45,11 +46,28 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const pathname = usePathname()
   const { data: session } = useSession()
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [streak, setStreak] = useState(14)
-  const [xp, setXP] = useState(2840)
+  const [streak, setStreak] = useState(0)
+  const [xp, setXP] = useState(0)
+  const [plan, setPlan] = useState('free')
+  const [usage, setUsage] = useState<{ used: number; limit: number }>({ used: 0, limit: 0 })
 
   // Close sidebar when route changes
   useEffect(() => { setSidebarOpen(false) }, [pathname])
+
+  useEffect(() => {
+    fetch('/api/gamification/streak').then(r => r.json()).then(j => {
+      if (j.success) { setStreak(j.data.current ?? 0); setXP(j.data.totalXp ?? 0) }
+    }).catch(() => {})
+    fetch('/api/billing').then(r => r.json()).then(j => {
+      if (j.success) {
+        setPlan(j.data?.subscription?.plan ?? 'free')
+        setUsage({
+          used: j.data?.usage?.videosGenerated ?? 0,
+          limit: j.data?.usage?.videosLimit ?? 0,
+        })
+      }
+    }).catch(() => {})
+  }, [])
 
   const isAdmin = session?.user?.isAdmin === true
 
@@ -77,7 +95,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg,#F59E0B,#EF4444)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 14, color: '#000', flexShrink: 0 }}>V</div>
           <div>
             <div style={{ fontWeight: 900, fontSize: 15, letterSpacing: '-0.02em' }}>ViralMint</div>
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 1 }}>Basic Plan</div>
+            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 1, textTransform: 'capitalize' }}>{plan} Plan</div>
           </div>
         </div>
 
@@ -124,10 +142,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* User footer */}
         <div style={{ padding: '12px 8px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
           <Link href="/dashboard/profile" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 8, textDecoration: 'none' }}>
-            <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg,#F59E0B,#EF4444)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#000', flexShrink: 0 }}>CK</div>
+            {session?.user?.image ? (
+              <img src={session.user.image} alt="" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+            ) : (
+              <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg,#F59E0B,#EF4444)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#000', flexShrink: 0 }}>
+                {getInitials(session?.user?.name ?? '')}
+              </div>
+            )}
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Charly K.</div>
-              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>32/50 videos used</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{session?.user?.name ?? 'Creator'}</div>
+              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>{usage.used}/{usage.limit} videos used</div>
             </div>
           </Link>
           <button

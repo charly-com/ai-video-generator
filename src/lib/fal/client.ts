@@ -52,7 +52,9 @@ export async function generateVideo(req: GenerateVideoRequest) {
     'kling-video-v2-master': hasImage
       ? 'fal-ai/kling-video/v2/master/image-to-video'
       : 'fal-ai/kling-video/v2/master/text-to-video',
-    'wan-pro': 'fal-ai/wan/v2.2/1080p',
+    'wan-pro': hasImage
+      ? 'fal-ai/wan/v2.2-a14b/image-to-video'
+      : 'fal-ai/wan/v2.2-a14b/text-to-video',
     'luma-dream-machine': 'fal-ai/luma-dream-machine',
   }
 
@@ -144,9 +146,10 @@ function buildVideoInput(req: GenerateVideoRequest) {
     return {
       ...base,
       ...(req.imageUrl ? { image_url: req.imageUrl } : {}),
-      num_frames: req.duration * 24, // 24fps
+      num_frames: Math.min(Math.max(Math.round(req.duration * 16), 17), 161), // 16fps, clamped 17–161
+      frames_per_second: 16,
       aspect_ratio: req.aspectRatio,
-      resolution: '1080p',
+      resolution: '720p',
     }
   }
 

@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect } from 'react'
 import { useSession, signOut } from 'next-auth/react'
-import { Flame, Trophy, Star, Settings, LogOut, Crown, Zap, Shield } from 'lucide-react'
+import { Trophy, Settings, LogOut, Crown, Zap, Shield } from 'lucide-react'
 import { BADGES, LEVELS, getLevel, getLevelProgress } from '../../../lib/gamification/system'
 import { getInitials } from '../../../lib/utils'
 import Link from 'next/link'
@@ -35,7 +35,7 @@ export default function ProfilePage() {
   const earnedBadgeIds = new Set(streak?.badges?.map(b => b.badgeId) ?? [])
 
   return (
-    <div className="max-w-2xl mx-auto space-y-4 pb-24">
+    <div className="max-w-2xl mx-auto space-y-4 px-4 pt-5 pb-24 sm:px-6 sm:pt-6">
       {/* Profile card */}
       <div className="rounded-2xl p-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
         <div className="flex items-center gap-4">

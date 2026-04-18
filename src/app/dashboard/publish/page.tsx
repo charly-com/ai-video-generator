@@ -2,7 +2,7 @@
 // src/app/dashboard/publish/page.tsx
 
 import { useState, useEffect } from 'react'
-import { Calendar, Clock, CheckCircle2, XCircle, Loader2, Send, Filter, RefreshCw, Globe } from 'lucide-react'
+import { Clock, CheckCircle2, XCircle, Loader2, Send, RefreshCw, Globe } from 'lucide-react'
 import { timeAgo, getPlatformEmoji, getPlatformColor } from '../../../lib/utils'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
@@ -60,7 +60,7 @@ export default function PublishPage() {
   useEffect(() => { load() }, [filter])
 
   return (
-    <div className="max-w-2xl mx-auto space-y-4 pb-24">
+    <div className="max-w-2xl mx-auto space-y-4 px-4 pt-5 pb-24 sm:px-6 sm:pt-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
