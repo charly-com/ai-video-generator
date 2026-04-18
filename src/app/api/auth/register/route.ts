@@ -1,9 +1,10 @@
 // src/app/api/auth/register/route.ts
-
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import { prisma } from '@/lib/db/prisma'
+import { sendVerificationEmail } from '@/lib/email/resend'
+import crypto from 'crypto'
 
 const RegisterSchema = z.object({
   name: z.string().min(1).max(80).optional(),
@@ -66,6 +67,18 @@ export async function POST(req: NextRequest) {
         periodEnd: end,
       },
     })
+
+    // Send verification email (non-blocking — don't fail registration if email fails)
+    try {
+      const token = crypto.randomBytes(32).toString('hex')
+      const expires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24h
+      await prisma.verificationToken.create({
+        data: { identifier: email, token, expires },
+      })
+      await sendVerificationEmail(email, token)
+    } catch (emailErr) {
+      console.warn('[register] Failed to send verification email:', emailErr)
+    }
 
     return NextResponse.json({ success: true, userId: user.id })
   } catch (error) {

@@ -94,7 +94,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <div style={{ padding: '16px 16px 12px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg,#F59E0B,#EF4444)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 14, color: '#000', flexShrink: 0 }}>V</div>
           <div>
-            <div style={{ fontWeight: 900, fontSize: 15, letterSpacing: '-0.02em' }}>ViralMint</div>
+            <div style={{ fontWeight: 900, fontSize: 15, letterSpacing: '-0.02em' }}>ViralKit</div>
             <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 1, textTransform: 'capitalize' }}>{plan} Plan</div>
           </div>
         </div>
@@ -182,7 +182,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <div style={{ padding: '16px 16px 12px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg,#F59E0B,#EF4444)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 14, color: '#000' }}>V</div>
-            <span style={{ fontWeight: 900, fontSize: 16 }}>ViralMint</span>
+            <span style={{ fontWeight: 900, fontSize: 16 }}>ViralKit</span>
           </div>
           <button onClick={() => setSidebarOpen(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: 20, cursor: 'pointer', padding: 4 }}>✕</button>
         </div>
@@ -316,5 +316,5 @@ function getPageTitle(pathname: string): string {
     '/dashboard/pricing': '💎 Upgrade Plan',
     '/dashboard/admin': '👑 Admin Dashboard',
   }
-  return titles[pathname] ?? 'ViralMint'
+  return titles[pathname] ?? 'ViralKit'
 }

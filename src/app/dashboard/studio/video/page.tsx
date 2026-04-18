@@ -1,8 +1,8 @@
 'use client'
 // src/app/dashboard/studio/video/page.tsx
 
-import { useState, useRef } from 'react'
-import { Wand2, Film, Sparkles, Play, Download, Send, ChevronDown, X, RotateCcw, Clock, Zap, Crown, Info } from 'lucide-react'
+import { useState, useRef, useCallback } from 'react'
+import { Wand2, Film, Sparkles, Download, Send, ChevronDown, RotateCcw, Zap, ImagePlus, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
 
@@ -37,14 +37,17 @@ export default function VideoStudioPage() {
   const [showAdvanced, setAdvanced] = useState(false)
   const [showScript, setShowScript] = useState(false)
 
-  const [scriptText, setScriptText] = useState('')
-  const [genStatus, setGenStatus]   = useState<'idle' | 'scripting' | 'generating' | 'done' | 'error'>('idle')
-  const [progress, setProgress]     = useState(0)
-  const [videoUrl, setVideoUrl]     = useState<string | null>(null)
-  const [contentId, setContentId]   = useState<string | null>(null)
+  const [scriptText, setScriptText]         = useState('')
+  const [genStatus, setGenStatus]           = useState<'idle' | 'scripting' | 'generating' | 'done' | 'error'>('idle')
+  const [progress, setProgress]             = useState(0)
+  const [videoUrl, setVideoUrl]             = useState<string | null>(null)
+  const [contentId, setContentId]           = useState<string | null>(null)
+  const [imagePreview, setImagePreview]     = useState<string | null>(null)
+  const [imageBase64, setImageBase64]       = useState<string | null>(null)
+  const [imageMediaType, setImageMediaType] = useState('image/jpeg')
+  const [analyzingImage, setAnalyzingImage] = useState(false)
   const progressRef = useRef<ReturnType<typeof setInterval> | null>(null)
-
-  const selectedModel = MODELS.find(m => m.id === model)!
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   async function generateScript() {
     if (!topic.trim()) { toast.error('Enter a topic first'); return }
@@ -65,6 +68,46 @@ export default function VideoStudioPage() {
       toast.error(e instanceof Error ? e.message : 'Script failed')
       setGenStatus('idle')
     }
+  }
+
+  const handleImageUpload = useCallback((file: File) => {
+    if (!file.type.startsWith('image/')) { toast.error('Please upload an image file'); return }
+    if (file.size > 5 * 1024 * 1024) { toast.error('Image must be under 5MB'); return }
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string
+      const [meta, b64] = dataUrl.split(',')
+      const mt = meta.match(/:(.*?);/)?.[1] ?? 'image/jpeg'
+      setImagePreview(dataUrl)
+      setImageBase64(b64)
+      setImageMediaType(mt)
+    }
+    reader.readAsDataURL(file)
+  }, [])
+
+  async function analyzeImage() {
+    if (!imageBase64) return
+    setAnalyzingImage(true)
+    try {
+      const res = await fetch('/api/studio/image-to-prompt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageBase64, mediaType: imageMediaType }),
+      })
+      const json = await res.json()
+      if (!json.success) throw new Error(json.error)
+      setPrompt(json.data.prompt)
+      toast.success('Prompt generated from image! 🎨')
+    } catch {
+      toast.error('Failed to analyse image')
+    }
+    setAnalyzingImage(false)
+  }
+
+  function clearImage() {
+    setImagePreview(null)
+    setImageBase64(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
   async function enhancePrompt() {
@@ -247,17 +290,59 @@ export default function VideoStudioPage() {
         )}
       </div>
 
+      {/* Image-to-Prompt */}
+      <div className="rounded-2xl p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+        <p className="text-[11px] font-600 uppercase tracking-wider mb-3 flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
+          <ImagePlus size={12} className="text-pink-400" /> Image → Prompt (AI)
+        </p>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={e => { const f = e.target.files?.[0]; if (f) handleImageUpload(f) }}
+        />
+        {imagePreview ? (
+          <div className="space-y-2">
+            <div className="relative rounded-xl overflow-hidden" style={{ maxHeight: 180 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={imagePreview} alt="Uploaded" className="w-full object-cover" style={{ maxHeight: 180 }} />
+              <button onClick={clearImage}
+                className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
+                style={{ background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.2)' }}>
+                <X size={12} className="text-white" />
+              </button>
+            </div>
+            <button onClick={analyzeImage} disabled={analyzingImage}
+              className="btn-brand w-full py-2.5 text-[13px] flex items-center justify-center gap-2 disabled:opacity-50">
+              <Sparkles size={14} />
+              {analyzingImage ? 'Analysing image…' : 'Generate prompt from this image'}
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full py-6 rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-2 transition-colors hover:border-orange-500/40"
+            style={{ borderColor: 'var(--border)', background: 'var(--bg-elevated)' }}>
+            <ImagePlus size={22} style={{ color: 'var(--text-muted)' }} />
+            <span className="text-[13px]" style={{ color: 'var(--text-secondary)' }}>Upload a reference image</span>
+            <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>AI will generate a matching video prompt</span>
+          </button>
+        )}
+      </div>
+
       {/* Prompt */}
       <div className="rounded-2xl p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
         <p className="text-[11px] font-600 uppercase tracking-wider mb-3" style={{ color: 'var(--text-muted)' }}>Video Prompt</p>
         <textarea
-          className="input-dark w-full px-3 py-2.5 text-[14px] resize-none"
-          rows={4}
-          placeholder="Describe your video scene, mood, style…"
+          className="input-dark w-full px-3 py-2.5 text-[14px]"
+          rows={7}
+          placeholder="Describe your video scene, mood, lighting, style, camera movement… Be specific for best results."
           value={prompt}
           onChange={e => setPrompt(e.target.value)}
+          style={{ resize: 'vertical', minHeight: 140 }}
         />
-        <div className="flex items-center gap-2 mt-2">
+        <div className="flex items-center gap-2 mt-2 flex-wrap">
           <button onClick={enhancePrompt} className="btn-ghost px-3 py-1.5 text-[12px] flex items-center gap-1.5">
             <Wand2 size={12} /> Enhance with Claude
           </button>

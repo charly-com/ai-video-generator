@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect } from 'react'
 import { useSession, signOut } from 'next-auth/react'
-import { Trophy, Settings, LogOut, Crown, Zap, Shield } from 'lucide-react'
+import { Trophy, Settings, LogOut, Crown, Zap, Shield, KeyRound, ChevronDown } from 'lucide-react'
 import { BADGES, LEVELS, getLevel, getLevelProgress } from '../../../lib/gamification/system'
 import { getInitials } from '../../../lib/utils'
 import Link from 'next/link'
@@ -19,6 +19,38 @@ export default function ProfilePage() {
   const { data: session } = useSession()
   const [streak, setStreak] = useState<StreakData | null>(null)
   const [plan, setPlan]     = useState('free')
+
+  const [showChangePw, setShowChangePw]   = useState(false)
+  const [currentPw, setCurrentPw]         = useState('')
+  const [newPw, setNewPw]                 = useState('')
+  const [confirmPw, setConfirmPw]         = useState('')
+  const [pwLoading, setPwLoading]         = useState(false)
+  const [pwError, setPwError]             = useState('')
+  const [pwSuccess, setPwSuccess]         = useState(false)
+
+  async function handleChangePw(e: React.FormEvent) {
+    e.preventDefault()
+    setPwError('')
+    setPwSuccess(false)
+    if (newPw !== confirmPw) { setPwError('New passwords do not match'); return }
+    if (newPw.length < 6) { setPwError('Password must be at least 6 characters'); return }
+    setPwLoading(true)
+    try {
+      const res = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword: currentPw, newPassword: newPw }),
+      })
+      const json = await res.json()
+      if (!json.success) { setPwError(json.error ?? 'Failed to update password'); return }
+      setPwSuccess(true)
+      setCurrentPw(''); setNewPw(''); setConfirmPw('')
+      setTimeout(() => { setPwSuccess(false); setShowChangePw(false) }, 2500)
+    } catch {
+      setPwError('Something went wrong. Please try again.')
+    }
+    setPwLoading(false)
+  }
 
   useEffect(() => {
     fetch('/api/gamification/streak').then(r => r.json()).then(j => {
@@ -133,12 +165,53 @@ export default function ProfilePage() {
         </div>
       </div>
 
+      {/* Change Password */}
+      <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+        <button
+          onClick={() => { setShowChangePw(!showChangePw); setPwError(''); setPwSuccess(false) }}
+          className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-white/3 transition-colors">
+          <KeyRound size={15} className="text-cyan-400" />
+          <span className="text-[14px] flex-1 text-left" style={{ color: 'var(--text-secondary)' }}>Change Password</span>
+          <ChevronDown size={14} className={`transition-transform ${showChangePw ? 'rotate-180' : ''}`} style={{ color: 'var(--text-muted)' }} />
+        </button>
+
+        {showChangePw && (
+          <div className="px-4 pb-4 border-t" style={{ borderColor: 'var(--border)' }}>
+            {pwSuccess ? (
+              <p className="text-[13px] text-green-400 py-3 text-center">✓ Password updated successfully!</p>
+            ) : (
+              <form onSubmit={handleChangePw} className="space-y-2 pt-3">
+                <input
+                  type="password" value={currentPw} onChange={e => setCurrentPw(e.target.value)}
+                  placeholder="Current password" required autoComplete="current-password"
+                  className="input-dark w-full px-3 py-2.5 text-[14px]" />
+                <input
+                  type="password" value={newPw} onChange={e => setNewPw(e.target.value)}
+                  placeholder="New password (min 6 chars)" required autoComplete="new-password"
+                  className="input-dark w-full px-3 py-2.5 text-[14px]" />
+                <input
+                  type="password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)}
+                  placeholder="Confirm new password" required autoComplete="new-password"
+                  className="input-dark w-full px-3 py-2.5 text-[14px]" />
+                {pwError && (
+                  <p className="text-[12px] text-red-400 px-1">{pwError}</p>
+                )}
+                <button type="submit" disabled={pwLoading || !currentPw || !newPw || !confirmPw}
+                  className="btn-brand w-full py-2.5 text-[13px] disabled:opacity-50">
+                  {pwLoading ? 'Updating…' : 'Update password'}
+                </button>
+              </form>
+            )}
+          </div>
+        )}
+      </div>
+
       {/* Settings links */}
       <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--border)' }}>
         {[
           { icon: <Crown size={15} />, label: 'Upgrade Plan', href: '/dashboard/pricing', color: 'text-orange-400' },
-          { icon: <Shield size={15} />, label: 'Privacy & Security', href: '#', color: 'text-cyan-400' },
-          { icon: <Settings size={15} />, label: 'Account Settings', href: '#', color: 'text-gray-400' },
+          { icon: <Shield size={15} />, label: 'Privacy Policy', href: '/privacy', color: 'text-cyan-400' },
+          { icon: <Settings size={15} />, label: 'Terms of Service', href: '/terms', color: 'text-gray-400' },
         ].map((item, i) => (
           <Link key={i} href={item.href}>
             <div className={`flex items-center gap-3 px-4 py-3.5 ${i > 0 ? 'border-t' : ''} hover:bg-white/3 transition-colors cursor-pointer`}

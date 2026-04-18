@@ -47,10 +47,10 @@ const ACHIEVEMENTS: Achievement[] = [
   { id: '3', title: 'Connected Creator', description: 'Connect 3 social accounts', icon: '🔗', unlocked: true, xp: 150, rarity: 'common' },
   { id: '4', title: 'On Fire', description: 'Maintain a 7-day streak', icon: '🔥', unlocked: true, xp: 300, rarity: 'rare' },
   { id: '5', title: 'Trendsetter', description: 'Create content on a trending topic', icon: '🏄', unlocked: true, xp: 200, rarity: 'rare' },
-  { id: '6', title: 'Viral Mint', description: 'Get 100,000 total views', icon: '💫', unlocked: false, progress: 48200, total: 100000, xp: 1000, rarity: 'epic' },
+  { id: '6', title: 'ViralKit', description: 'Get 100,000 total views', icon: '💫', unlocked: false, progress: 48200, total: 100000, xp: 1000, rarity: 'epic' },
   { id: '7', title: 'Content Machine', description: 'Generate 100 AI videos', icon: '⚡', unlocked: false, progress: 32, total: 100, xp: 750, rarity: 'epic' },
   { id: '8', title: 'Platform Dominator', description: 'Connect all 6 platforms', icon: '🌍', unlocked: false, progress: 4, total: 6, xp: 500, rarity: 'rare' },
-  { id: '9', title: 'ViralMint Legend', description: 'Reach 1,000,000 total views', icon: '👑', unlocked: false, progress: 48200, total: 1000000, xp: 5000, rarity: 'legendary' },
+  { id: '9', title: 'ViralKit Legend', description: 'Reach 1,000,000 total views', icon: '👑', unlocked: false, progress: 48200, total: 1000000, xp: 5000, rarity: 'legendary' },
 ]
 
 const RANKS = [

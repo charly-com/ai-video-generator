@@ -65,7 +65,7 @@ async function safe<T>(fn: () => Promise<T>, label: string): Promise<T | null> {
 export async function fetchGoogleTrends(geo = 'US'): Promise<NormalizedTrend[]> {
   const url = `https://trends.google.com/trending/rss?geo=${encodeURIComponent(geo)}`
   const res = await fetch(url, {
-    headers: { 'User-Agent': 'Mozilla/5.0 ViralMintBot/1.0' },
+    headers: { 'User-Agent': 'Mozilla/5.0 ViralKitBot/1.0' },
     next: { revalidate: 900 },
   })
   if (!res.ok) throw new Error(`Google Trends returned ${res.status}`)
@@ -169,7 +169,7 @@ interface RedditPost {
 
 export async function fetchRedditRising(): Promise<NormalizedTrend[]> {
   const res = await fetch('https://www.reddit.com/r/all/rising.json?limit=20', {
-    headers: { 'User-Agent': 'ViralMintBot/1.0 (trend radar)' },
+    headers: { 'User-Agent': 'ViralKitBot/1.0 (trend radar)' },
     next: { revalidate: 900 },
   })
   if (!res.ok) throw new Error(`Reddit returned ${res.status}`)
@@ -257,7 +257,7 @@ export async function fetchHackerNewsTop(): Promise<NormalizedTrend[]> {
 export async function fetchXTrends(country = 'worldwide'): Promise<NormalizedTrend[]> {
   const url = `https://trends24.in/${country === 'worldwide' ? '' : country + '/'}`
   const res = await fetch(url, {
-    headers: { 'User-Agent': 'Mozilla/5.0 ViralMintBot/1.0' },
+    headers: { 'User-Agent': 'Mozilla/5.0 ViralKitBot/1.0' },
     next: { revalidate: 900 },
   })
   if (!res.ok) throw new Error(`Trends24 returned ${res.status}`)

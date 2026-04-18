@@ -1,6 +1,6 @@
-// public/sw.js — ViralMint Service Worker
+// public/sw.js — ViralKit Service Worker
 
-const CACHE_VERSION = 'viralmint-v1.0.0'
+const CACHE_VERSION = 'viralkit-v1.0.0'
 const STATIC_CACHE = `${CACHE_VERSION}-static`
 const DYNAMIC_CACHE = `${CACHE_VERSION}-dynamic`
 const IMAGE_CACHE = `${CACHE_VERSION}-images`
@@ -31,7 +31,7 @@ self.addEventListener('activate', event => {
     caches.keys().then(keys =>
       Promise.all(
         keys
-          .filter(k => k.startsWith('viralmint-') && k !== STATIC_CACHE && k !== DYNAMIC_CACHE && k !== IMAGE_CACHE)
+          .filter(k => k.startsWith('viralkit-') && k !== STATIC_CACHE && k !== DYNAMIC_CACHE && k !== IMAGE_CACHE)
           .map(k => caches.delete(k))
       )
     )
@@ -131,7 +131,7 @@ self.addEventListener('push', event => {
   try {
     data = event.data.json()
   } catch {
-    data = { title: 'ViralMint', body: event.data.text() }
+    data = { title: 'ViralKit', body: event.data.text() }
   }
 
   const options = {
@@ -147,7 +147,7 @@ self.addEventListener('push', event => {
   }
 
   event.waitUntil(
-    self.registration.showNotification(data.title || 'ViralMint', options)
+    self.registration.showNotification(data.title || 'ViralKit', options)
   )
 })
 
@@ -172,7 +172,7 @@ self.addEventListener('sync', event => {
 })
 
 async function retryFailedPublishes() {
-  const cache = await caches.open('viralmint-pending-publishes')
+  const cache = await caches.open('viralkit-pending-publishes')
   const requests = await cache.keys()
 
   for (const request of requests) {

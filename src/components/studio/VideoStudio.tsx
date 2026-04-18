@@ -77,7 +77,7 @@ export function VideoStudio() {
     if (!videoUrl) return
     setDownloading(true)
     try {
-      const name = `viralmint-${Date.now()}.mp4`
+      const name = `viralkit-${Date.now()}.mp4`
       const proxyUrl = `/api/download?url=${encodeURIComponent(videoUrl)}&name=${encodeURIComponent(name)}`
       const res = await fetch(proxyUrl)
       if (!res.ok) throw new Error('Download failed')
